@@ -1,3 +1,5 @@
+'use client'; // Necessário para permitir interatividade
+
 export default function Home() {
   return (
     <main style={{ fontFamily: 'Arial, sans-serif', margin: 0, padding: 0 }}>
