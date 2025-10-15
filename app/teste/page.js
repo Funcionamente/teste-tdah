@@ -2,7 +2,6 @@
 import { useState } from 'react';
 
 export default function TesteTDAH() {
-  // 30 perguntas exemplo
   const perguntas = [
     { pergunta: 'Você tem dificuldade para se concentrar em tarefas longas?', opcoes: ['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'] },
     { pergunta: 'Você se distrai facilmente com estímulos externos?', opcoes: ['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'] },
@@ -36,7 +35,6 @@ export default function TesteTDAH() {
       alert('Por favor, selecione uma opção antes de concluir.');
       return;
     }
-    // Calcular pontuação
     const pontuacao = respostas.reduce((acc, val) => acc + Number(val), 0);
     localStorage.setItem('pontuacaoTeste', pontuacao);
     window.location.href = '/checkout';
