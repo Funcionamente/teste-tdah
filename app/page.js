@@ -1,11 +1,7 @@
 export default function Home() {
   return (
-    <main style={{
-      fontFamily: 'Arial, sans-serif',
-      margin: 0,
-      padding: 0,
-      backgroundColor: '#f9fafb'
-    }}>
+    <main style={{ fontFamily: 'Arial, sans-serif', margin: 0, padding: 0 }}>
+      
       {/* Hero Section */}
       <section style={{
         display: 'flex',
@@ -13,16 +9,16 @@ export default function Home() {
         alignItems: 'center',
         justifyContent: 'center',
         height: '100vh',
-        backgroundColor: '#2563eb',
+        background: 'linear-gradient(135deg, #2563eb, #60a5fa)',
         color: 'white',
         textAlign: 'center',
         padding: '0 20px'
       }}>
-        <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>
-          Descubra se você pode ter TDAH!
+        <h1 style={{ fontSize: '3rem', marginBottom: '20px', fontWeight: 'bold' }}>
+          Descubra se você pode ter TDAH
         </h1>
         <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>
-          Responda 30 perguntas rápidas e receba 2 e-books gratuitos sobre TDAH.
+          Responda 30 perguntas criadas seguindo <strong>normas de saúde reconhecidas</strong> e receba dois e-books gratuitos.
         </p>
         <a 
           href="/teste" 
@@ -30,11 +26,15 @@ export default function Home() {
             backgroundColor: 'white',
             color: '#2563eb',
             padding: '15px 30px',
-            borderRadius: '8px',
+            borderRadius: '12px',
             fontWeight: 'bold',
             textDecoration: 'none',
-            fontSize: '1.1rem'
+            fontSize: '1.2rem',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            transition: 'transform 0.2s',
           }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           Iniciar Teste
         </a>
@@ -48,7 +48,7 @@ export default function Home() {
         justifyContent: 'center',
         padding: '60px 20px'
       }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '40px' }}>Por que fazer este teste?</h2>
+        <h2 style={{ fontSize: '2rem', marginBottom: '40px', textAlign: 'center' }}>Por que fazer este teste?</h2>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -57,20 +57,20 @@ export default function Home() {
         }}>
           <div style={{
             backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '10px',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+            padding: '30px',
+            borderRadius: '15px',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
             width: '250px',
             textAlign: 'center'
           }}>
             <h3>Entenda seus comportamentos</h3>
-            <p>Saiba se sinais do seu dia a dia podem estar ligados ao TDAH.</p>
+            <p>Saiba se sinais do dia a dia podem estar ligados ao TDAH.</p>
           </div>
           <div style={{
             backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '10px',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+            padding: '30px',
+            borderRadius: '15px',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
             width: '250px',
             textAlign: 'center'
           }}>
@@ -79,25 +79,27 @@ export default function Home() {
           </div>
           <div style={{
             backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '10px',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+            padding: '30px',
+            borderRadius: '15px',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
             width: '250px',
             textAlign: 'center'
           }}>
             <h3>Receba e-books gratuitos</h3>
-            <p>Aprenda mais sobre TDAH com os e-books: Explicando o TDAH e Como o TDAH afeta relacionamentos.</p>
+            <p>Aprenda mais sobre TDAH com os e-books: <strong>Explicando o TDAH</strong> e <strong>Como o TDAH afeta relacionamentos</strong>.</p>
           </div>
         </div>
       </section>
 
-      {/* Garantia */}
+      {/* Garantia / Credibilidade */}
       <section style={{
         backgroundColor: '#f3f4f6',
         textAlign: 'center',
-        padding: '40px 20px'
+        padding: '40px 20px',
+        fontSize: '1rem',
+        color: '#333'
       }}>
-        <p>🔒 Teste informativo, não substitui avaliação médica. Seus dados são protegidos.</p>
+        <p>🔒 Este teste é apenas informativo, criado seguindo normas de saúde reconhecidas e não substitui avaliação médica profissional. Seus dados são totalmente protegidos.</p>
       </section>
 
       {/* CTA Final */}
@@ -112,11 +114,15 @@ export default function Home() {
             backgroundColor: '#2563eb',
             color: 'white',
             padding: '15px 30px',
-            borderRadius: '8px',
+            borderRadius: '12px',
             fontWeight: 'bold',
             textDecoration: 'none',
-            fontSize: '1.1rem'
+            fontSize: '1.2rem',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            transition: 'transform 0.2s',
           }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
         >
           Começar Teste
         </a>
