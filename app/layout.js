@@ -1,14 +1,20 @@
+import "./globals.css";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
 export const metadata = {
-  title: 'Teste TDAH',
-  description: 'Teste interativo para identificar sinais de TDAH',
+  title: "Teste TDAH",
+  description: "Avalie seu nível de atenção e foco de forma profissional e interativa",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body style={{ margin: 0, fontFamily: 'Arial, sans-serif', backgroundColor: '#f3f4f6' }}>
-        {children}
-      </body>
+    <html lang="pt-br" className={inter.variable}>
+      <body className="font-inter">{children}</body>
     </html>
   );
 }
