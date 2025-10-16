@@ -2,24 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Glassmorphism padrão para botões e cards */
-.bg-glass {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+​/* Efeitos globais modernos */
+​body {
+  @apply bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white min-h-screen antialiased;
+  font-family: 'Inter', sans-serif;
+}
+
+.glass {
+  b​ackground: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
 }
 
-/* Botão hover */
 .btn-glass {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .btn-glass:hover {
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.cta-button:hover {
-  background-color: #f3f4f6;
-  transform: scale(1.03);
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 40px rgba(99, 102, 241, 0.4);
 }
