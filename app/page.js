@@ -1,226 +1,98 @@
-'use client';
+"use client";
+import React from "react";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <main style={{
-      fontFamily: 'Inter, Arial, sans-serif',
-      backgroundColor: '#f9fafb',
-      color: '#111827',
-      lineHeight: 1.6
-    }}>
-      {/* HERO SECTION */}
-      <section style={{
-        background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-        color: 'white',
-        textAlign: 'center',
-        padding: '100px 20px'
-      }}>
-        <h1 style={{ fontSize: '2.8rem', marginBottom: '20px', fontWeight: 'bold' }}>
-          Descubra se você pode ter TDAH
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#f9fafb] via-[#eef2ff] to-[#e0e7ff] text-gray-800 p-6">
+      
+      {/* Hero Section */}
+      <section className="text-center max-w-3xl mb-16">
+        <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 bg-clip-text text-transparent">
+          Teste TDAH Profissional
         </h1>
-        <p style={{ fontSize: '1.2rem', maxWidth: '700px', margin: '0 auto 30px' }}>
-          Um teste rápido e gratuito, desenvolvido com base em protocolos internacionais de triagem em saúde mental.
-          Receba também 2 e-books exclusivos sobre o TDAH.
+        <p className="mt-6 text-lg md:text-xl text-gray-600 leading-relaxed">
+          Descubra em poucos minutos se você apresenta <strong>traços de TDAH</strong>.
+          Nosso teste segue padrões de avaliação baseados em critérios científicos e psicológicos atualizados.
         </p>
-         <a
-          href="/teste"
-          style={{
-            backgroundColor: 'white',
-            color: '#2563eb',
-            padding: '15px 35px',
-            borderRadius: '10px',
-            fontWeight: 'bold',
-            fontSize: '1.1rem',
-            textDecoration: 'none',
-            display: 'inline-block',
-            transition: 'all 0.3s ease',
-        }}
-        className="cta-button"
-      >
-        Fazer o teste agora
-      </a>
       </section>
 
-      {/* IDENTIFICAÇÃO — "VOCÊ JÁ SE PERGUNTOU..." */}
-      <section style={{
-        textAlign: 'center',
-        padding: '80px 20px',
-        backgroundColor: 'white'
-      }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '30px', color: '#1f2937' }}>
-          Você já se perguntou por que...
-        </h2>
-        <div style={{
-          maxWidth: '700px',
-          margin: '0 auto',
-          fontSize: '1.1rem',
-          color: '#374151'
-        }}>
-          <p>… tem dificuldade em manter o foco por muito tempo?</p>
-          <p>… começa várias tarefas mas raramente as conclui?</p>
-          <p>… se sente sobrecarregado facilmente ou esquece compromissos importantes?</p>
-          <p>Esses podem ser sinais de <strong>Traços de TDAH (Transtorno de Déficit de Atenção e Hiperatividade)</strong> — 
-          um padrão de funcionamento cerebral que afeta milhões de adultos em todo o mundo.</p>
-        </div>
+      {/* Identificação / Perguntas que conectam emocionalmente */}
+      <section className="glass-card p-10 max-w-2xl text-center">
+        <h2 className="text-2xl font-semibold mb-4 title-gradient">Você já se perguntou...</h2>
+        <ul className="text-gray-700 text-lg mb-6 list-disc list-inside text-left space-y-2">
+          <li>Por que é tão difícil se concentrar em tarefas simples?</li>
+          <li>Por que começa várias coisas, mas termina poucas?</li>
+          <li>Por que sente que sua mente nunca para?</li>
+        </ul>
+        <p className="text-gray-600">
+          Esses sinais podem estar ligados a traços do <strong>TDAH (Transtorno de Déficit de Atenção e Hiperatividade)</strong>.
+          O teste abaixo ajuda você a compreender melhor seu perfil de atenção e foco.
+        </p>
       </section>
 
-      {/* SOBRE O TDAH */}
-      <section style={{
-        backgroundColor: '#f3f4f6',
-        padding: '60px 20px',
-        textAlign: 'center'
-      }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2rem', marginBottom: '20px' }}>O que é o TDAH?</h2>
-          <p style={{ fontSize: '1.1rem', color: '#374151' }}>
-            O TDAH é um transtorno neurobiológico caracterizado por sintomas de desatenção, impulsividade e hiperatividade. 
-            Ele pode afetar o desempenho no trabalho, nos estudos e nas relações pessoais — mas é totalmente possível 
-            aprender a gerenciar e equilibrar esses traços com orientação adequada.
-          </p>
-        </div>
-      </section>
-
-      {/* IMAGEM DO RESULTADO */}
-      <section style={{
-        textAlign: 'center',
-        padding: '60px 20px'
-      }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '30px' }}>Exemplo do resultado do teste</h2>
+      {/* Exemplo do resultado do teste */}
+      <section className="glass-card mt-16 p-10 max-w-3xl text-center">
+        <h2 className="text-2xl font-semibold mb-6 title-gradient">Exemplo de Resultado</h2>
         <img
-          src="https://via.placeholder.com/700x400.png?text=Exemplo+do+Resultado+do+Teste"
-          alt="Exemplo do resultado do teste"
-          style={{
-            width: '100%',
-            maxWidth: '700px',
-            borderRadius: '12px',
-            boxShadow: '0 6px 15px rgba(0,0,0,0.1)'
-          }}
+          src="https://via.placeholder.com/600x300/edf2ff/1e3a8a?text=Exemplo+de+Resultado+do+Teste+TDAH"
+          alt="Exemplo de resultado"
+          className="rounded-xl shadow-lg mb-6 mx-auto"
         />
-      </section>
-
-      {/* BENEFÍCIOS */}
-      <section style={{
-        padding: '80px 20px',
-        backgroundColor: 'white',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '40px' }}>Por que fazer o teste?</h2>
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '30px',
-          justifyContent: 'center'
-        }}>
-          {[
-            {
-              title: 'Entenda seus padrões mentais',
-              desc: 'Descubra se seus desafios diários estão ligados a traços de TDAH.'
-            },
-            {
-              title: 'Orientação profissional',
-              desc: 'Saiba quando é importante procurar um especialista para uma avaliação completa.'
-            },
-            {
-              title: 'Receba e-books gratuitos',
-              desc: 'Ganhe acesso a 2 materiais exclusivos sobre TDAH e autoconhecimento.'
-            }
-          ].map((item, index) => (
-            <div key={index} style={{
-              backgroundColor: '#f9fafb',
-              padding: '25px',
-              borderRadius: '10px',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-              width: '260px'
-            }}>
-              <h3 style={{ marginBottom: '10px', color: '#1f2937' }}>{item.title}</h3>
-              <p style={{ color: '#4b5563' }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* DEPOIMENTOS */}
-      <section style={{
-        backgroundColor: '#f3f4f6',
-        padding: '80px 20px',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '40px' }}>O que dizem as pessoas que já fizeram o teste</h2>
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '30px',
-          justifyContent: 'center'
-        }}>
-          {[
-            {
-              name: 'Mariana S.',
-              text: '“Achei o teste extremamente esclarecedor. Foi o ponto de partida para eu buscar diagnóstico e melhorar minha rotina.”'
-            },
-            {
-              name: 'Lucas R.',
-              text: '“O resultado fez muito sentido pra mim. Percebi que não era preguiça, mas um padrão que precisava entender melhor.”'
-            },
-            {
-              name: 'Camila T.',
-              text: '“Adorei o material e a explicação. Tudo é muito didático e acolhedor.”'
-            }
-          ].map((dep, index) => (
-            <div key={index} style={{
-              backgroundColor: 'white',
-              padding: '25px',
-              borderRadius: '10px',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
-              width: '280px'
-            }}>
-              <p style={{ fontStyle: 'italic', color: '#374151' }}>{dep.text}</p>
-              <p style={{ marginTop: '15px', fontWeight: 'bold', color: '#2563eb' }}>{dep.name}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* GARANTIA E CREDIBILIDADE */}
-      <section style={{
-        backgroundColor: '#1e293b',
-        color: 'white',
-        textAlign: 'center',
-        padding: '60px 20px'
-      }}>
-        <p style={{ maxWidth: '800px', margin: '0 auto', fontSize: '1rem' }}>
-          Este teste foi desenvolvido seguindo padrões internacionais de triagem em saúde mental e respeita as normas éticas e de privacidade. 
-          É uma ferramenta informativa e não substitui diagnóstico médico ou psicológico.
+        <p className="text-gray-600">
+          O relatório mostra seu nível de atenção, impulsividade e hiperatividade — com uma breve
+          análise de cada área e recomendações práticas para o seu dia a dia.
         </p>
       </section>
 
-      {/* CTA FINAL */}
-      <section style={{
-        textAlign: 'center',
-        padding: '80px 20px',
-        background: 'linear-gradient(135deg, #1d4ed8, #2563eb)',
-        color: 'white'
-      }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '20px' }}>
-          Dê o primeiro passo para entender melhor sua mente
+      {/* Depoimentos */}
+      <section className="mt-20 max-w-4xl w-full px-4">
+        <h2 className="text-3xl font-semibold text-center mb-10 title-gradient">
+          O que dizem sobre o teste
         </h2>
-        <a
-          href="/teste"
-          style={{
-            backgroundColor: 'white',
-            color: '#2563eb',
-            padding: '15px 35px',
-            borderRadius: '10px',
-            fontWeight: 'bold',
-            fontSize: '1.1rem',
-            textDecoration: 'none',
-            display: 'inline-block',
-            transition: 'all 0.3s ease',
-        }}
-        className="cta-button"
-      >
-        Fazer o teste agora
-      </a>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            {
+              nome: "Mariana S.",
+              texto:
+                "O teste me ajudou a entender padrões que sempre ignorei. Foi um divisor de águas!",
+            },
+            {
+              nome: "Lucas A.",
+              texto:
+                "Simples, rápido e com explicações claras. Finalmente entendi o que estava acontecendo comigo.",
+            },
+            {
+              nome: "Fernanda T.",
+              texto:
+                "Achei o teste muito bem feito, com base científica e linguagem acessível.",
+            },
+          ].map((dep, i) => (
+            <div key={i} className="glass-card p-6">
+              <p className="italic text-gray-700 mb-4">“{dep.texto}”</p>
+              <p className="font-semibold text-blue-700">{dep.nome}</p>
+            </div>
+          ))}
+        </div>
       </section>
+
+      {/* Chamada final */}
+      <section className="mt-20 text-center">
+        <h3 className="text-2xl font-semibold mb-6 title-gradient">
+          Pronto para entender melhor sua mente?
+        </h3>
+        <Link href="/teste">
+          <button className="btn-glass px-10 py-3 text-lg">
+            Fazer o Teste Agora
+          </button>
+        </Link>
+      </section>
+
+      {/* Rodapé */}
+      <footer className="mt-24 text-center text-sm text-gray-500">
+        <p>© {new Date().getFullYear()} Avaliação Psicológica Digital. Todos os direitos reservados.</p>
+        <p className="mt-2">Desenvolvido seguindo boas práticas e normas de avaliação psicológica reconhecidas.</p>
+      </footer>
     </main>
   );
 }
