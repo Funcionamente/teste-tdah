@@ -1,3 +1,5 @@
+'use client';
+
 export default function Home() {
   return (
     <main style={{
@@ -20,7 +22,7 @@ export default function Home() {
           Um teste rápido e gratuito, desenvolvido com base em protocolos internacionais de triagem em saúde mental.
           Receba também 2 e-books exclusivos sobre o TDAH.
         </p>
-        <a
+         <a
           href="/teste"
           style={{
             backgroundColor: 'white',
@@ -30,13 +32,13 @@ export default function Home() {
             fontWeight: 'bold',
             fontSize: '1.1rem',
             textDecoration: 'none',
-            transition: '0.3s',
-          }}
-          onMouseOver={(e) => (e.target.style.backgroundColor = '#f3f4f6')}
-          onMouseOut={(e) => (e.target.style.backgroundColor = 'white')}
-        >
-          Fazer o teste agora
-        </a>
+            display: 'inline-block',
+            transition: 'all 0.3s ease',
+        }}
+        className="cta-button"
+      >
+        Fazer o teste agora
+      </a>
       </section>
 
       {/* IDENTIFICAÇÃO — "VOCÊ JÁ SE PERGUNTOU..." */}
@@ -211,10 +213,13 @@ export default function Home() {
             fontWeight: 'bold',
             fontSize: '1.1rem',
             textDecoration: 'none',
-          }}
-        >
-          Fazer o teste agora
-        </a>
+            display: 'inline-block',
+            transition: 'all 0.3s ease',
+        }}
+        className="cta-button"
+      >
+        Fazer o teste agora
+      </a>
       </section>
     </main>
   );
