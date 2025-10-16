@@ -1,14 +1,14 @@
-import './globals.css';
-
 export const metadata = {
   title: 'Teste TDAH',
-  description: 'Descubra se você tem traços de TDAH',
+  description: 'Teste interativo para identificar sinais de TDAH',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body style={{ margin: 0, fontFamily: 'Arial, sans-serif', backgroundColor: '#f3f4f6' }}>
+        {children}
+      </body>
     </html>
   );
 }
