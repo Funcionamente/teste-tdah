@@ -1,3 +1,5 @@
+import './globals.css';
+
 export const metadata = {
   title: 'Teste TDAH',
   description: 'Avalie seu nível de atenção e foco de forma profissional e interativa, para identificar sinais de TDAH',
@@ -6,7 +8,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-br">
-      <body style={{ margin: 0, fontFamily: 'Arial, sans-serif', backgroundColor: '#f3f4f6'}}>
+      <body className="font-sans bg-gradient-to-b from-indigo-50 via-white to-pink-50">
         {children}
       </body>
     </html>
