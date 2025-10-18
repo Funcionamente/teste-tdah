@@ -171,8 +171,8 @@ export default function TestePage() {
           className="text-center"
         >
           <p className="text-xl mb-4">
-            "Estamos calculando seu resultado…"
-            "Clique abaixo para acessar o resultado completo e receber os seus 2 e-books gratuitos."
+            Estamos calculando seu resultado…,
+            Clique abaixo para acessar o resultado completo e receber os seus 2 e-books gratuitos.
           </p>
           <a
             href="/checkout"
