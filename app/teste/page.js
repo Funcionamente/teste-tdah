@@ -1,192 +1,175 @@
 "use client";
+
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import FaixaDestaque from "@/components/FaixaDestaque";
 
-const questions = [
-  "Você tem dificuldade em organizar tarefas que exigem muita concentração?",
-  "Você evita ou adia tarefas que exigem muito pensamento?",
-  "Você se distrai com facilidade por estímulos externos?",
-  "Você deixa de prestar atenção em conversas, mesmo quando falam diretamente com você?",
-  "Você perde ou esquece objetos importantes (chaves, celular, carteira)?",
-  "Você se sente inquieto ou tem dificuldade em relaxar quando tem tempo livre?",
-  "Você tem dificuldade em concluir os detalhes de um projeto após ter feito as partes mais difíceis?",
-  "Você se sente impaciente em filas ou situações em que precisa esperar?",
-  "Você interrompe os outros quando estão falando?",
-  "Você fala demais em situações sociais?",
-  "Você tem dificuldade em manter o foco em tarefas repetitivas ou demoradas?",
-  "Você muda de atividade antes de concluir a anterior?",
-  "Você sente que sua mente está acelerada, mesmo em momentos calmos?",
-  "Você se sente sobrecarregado facilmente com múltiplas tarefas?",
-  "Você precisa de lembretes constantes para compromissos ou prazos?",
-  "Você toma decisões impulsivas sem pensar nas consequências?",
-  "Você se sente distraído mesmo em ambientes silenciosos?",
-  "Você sente que está sempre “ligado” ou não consegue parar de pensar?",
-  "Você subestima o tempo necessário para realizar tarefas?",
-  "Você se frustra com facilidade quando as coisas não saem como o esperado?",
-  "Você sente que começa o dia produtivo, mas perde o ritmo rapidamente?",
-  "Você perde o interesse em algo logo após começar?",
-  "Você sente que precisa de pressão ou prazos para conseguir agir?",
-  "Você sente dificuldade em priorizar tarefas importantes?",
-  "Você se distrai durante leituras ou filmes?",
-  "Você procrastina mesmo sabendo que isso te prejudica?",
-  "Você sente que tem dificuldade em manter hábitos ou rotinas?",
-  "Você se sente emocionalmente esgotado por pequenas coisas?",
-  "Você sente dificuldade em ouvir instruções completas?",
-  "Você se sente diferente das outras pessoas em como sua mente funciona?",
+const perguntas = [
+  "Você tem dificuldade em manter a atenção em tarefas ou atividades prolongadas?",
+  "Costuma cometer erros por descuido em tarefas simples?",
+  "Tem dificuldade em organizar suas atividades diárias?",
+  "Evita tarefas que exigem esforço mental prolongado?",
+  "Perde objetos importantes com frequência?",
+  "É facilmente distraído por estímulos externos?",
+  "Tem dificuldade em seguir instruções detalhadas até o fim?",
+  "Costuma interromper os outros quando estão falando?",
+  "Fala excessivamente em situações sociais?",
+  "Se sente inquieto ou tem dificuldade em relaxar?",
+  "Sente-se impaciente em filas ou em situações que exigem espera?",
+  "Tem dificuldade em gerenciar o tempo?",
+  "Esquece compromissos, prazos ou reuniões com frequência?",
+  "Tem a sensação de que sua mente está “sempre ligada”?",
+  "Se sente sobrecarregado por tarefas simples do dia a dia?",
+  "Tem dificuldade em concluir o que começou?",
+  "Fica facilmente entediado quando não há estímulos novos?",
+  "Costuma procrastinar tarefas importantes?",
+  "Se envolve em várias atividades ao mesmo tempo e não finaliza?",
+  "Sente-se impulsivo em decisões do cotidiano?",
+  "Tem dificuldades para ouvir com atenção quando alguém fala com você?",
+  "Sente necessidade constante de se mover, mesmo em momentos de descanso?",
+  "Fica irritado quando é interrompido em algo que está fazendo?",
+  "Tem dificuldade em manter a motivação em projetos longos?",
+  "Percebe que sua atenção muda rapidamente entre ideias ou tarefas?",
+  "Costuma esquecer onde guardou objetos importantes?",
+  "Sente-se ansioso ou agitado sem motivo aparente?",
+  "Tem dificuldade em lidar com frustrações?",
+  "Age antes de pensar nas consequências?",
+  "Se sente frequentemente desorganizado(a) mentalmente?",
 ];
 
-const options = [
-  { label: "Nunca", value: 0 },
-  { label: "Raramente", value: 1 },
-  { label: "Às vezes", value: 2 },
-  { label: "Frequentemente", value: 3 },
-  { label: "Sempre", value: 5 },
+const opcoes = [
+  { texto: "Nunca", valor: 0 },
+  { texto: "Raramente", valor: 1 },
+  { texto: "Às vezes", valor: 2 },
+  { texto: "Frequentemente", valor: 3 },
+  { texto: "Sempre", valor: 5 },
 ];
 
-export default function TestePage() {
-  const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState(Array(questions.length).fill(null));
-  const [finished, setFinished] = useState(false);
-  const [showLoading, setShowLoading] = useState(false);
+export default function TesteTDAH() {
+  const [indice, setIndice] = useState(0);
+  const [respostas, setRespostas] = useState(Array(perguntas.length).fill(null));
+  const [concluido, setConcluido] = useState(false);
 
-  const progress = ((current + 1) / questions.length) * 100;
+  const progresso = ((indice + 1) / perguntas.length) * 100;
 
-  const handleAnswer = (value) => {
-    const newAnswers = [...answers];
-    newAnswers[current] = value;
-    setAnswers(newAnswers);
+  const handleResposta = (valor) => {
+    const novas = [...respostas];
+    novas[indice] = valor;
+    setRespostas(novas);
   };
 
-  const handleNext = () => {
-    if (current < questions.length - 1) setCurrent(current + 1);
-    else handleFinish();
+  const handleProximo = () => {
+    if (indice < perguntas.length - 1) {
+      setIndice(indice + 1);
+    } else {
+      setConcluido(true);
+    }
   };
 
-  const handleBack = () => {
-    if (current > 0) setCurrent(current - 1);
+  const handleVoltar = () => {
+    if (indice > 0) setIndice(indice - 1);
   };
 
-  const handleFinish = () => {
-    setShowLoading(true);
-    setTimeout(() => {
-      setShowLoading(false);
-      setFinished(true);
-    }, 2000);
-  };
-
-  const totalScore = answers.reduce((acc, val) => acc + (val ?? 0), 0);
+  const pontuacaoTotal = respostas.reduce((acc, val) => acc + (val ?? 0), 0);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] text-white px-4">
-      <h1 className="text-3xl font-bold text-[#f59e0b] mb-8 text-center">
-        Teste Interativo TDAH
-      </h1>
+    <div className="min-h-screen flex flex-col justify-between bg-neutral-950 text-white">
+      {/* Barra de Progresso */}
+      <div className="h-2 bg-neutral-800 w-full">
+        <motion.div
+          className="h-2 bg-gradient-to-r from-amber-400 to-yellow-500"
+          initial={{ width: 0 }}
+          animate={{ width: `${progresso}%` }}
+          transition={{ duration: 0.4 }}
+        />
+      </div>
 
-      {!finished ? (
-        <>
-          {/* Barra de progresso */}
-          <div className="w-full max-w-xl bg-gray-700 rounded-full h-2 mb-10 overflow-hidden">
-            <motion.div
-              className="bg-[#f59e0b] h-2"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.4 }}
-            />
-          </div>
+      {/* Título */}
+      <div className="text-center mt-10">
+        <h1 className="text-3xl md:text-4xl font-semibold text-amber-400">
+          Teste Interativo TDAH
+        </h1>
+      </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.4 }}
-              className="w-full max-w-2xl text-center"
-            >
-              <p className="text-lg sm:text-xl font-medium mb-8">
-                {questions[current]}
-              </p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {options.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleAnswer(option.value)}
-                    className={`px-4 py-2 rounded-full text-sm sm:text-base border transition-all ${
-                      answers[current] === option.value
-                        ? "bg-[#f59e0b] text-black border-[#f59e0b]"
-                        : "border-gray-500 hover:border-[#f59e0b]"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+      {/* Conteúdo Principal */}
+      <div className="flex-grow flex flex-col justify-center items-center px-6">
+        {!concluido ? (
+          <motion.div
+            key={indice}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="max-w-2xl text-center"
+          >
+            <p className="text-xl md:text-2xl mb-10">{perguntas[indice]}</p>
 
-          {/* Botões de navegação */}
-          <div className="flex gap-4 mt-12">
+            <div className="flex flex-wrap justify-center gap-3">
+              {opcoes.map((opcao, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleResposta(opcao.valor)}
+                  className={`px-5 py-3 rounded-full border transition-all duration-300 ${
+                    respostas[indice] === opcao.valor
+                      ? "bg-amber-500 text-black border-amber-400"
+                      : "border-neutral-700 hover:border-amber-400 hover:text-amber-400"
+                  }`}
+                >
+                  {opcao.texto}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex justify-center gap-4 mt-10">
+              {indice > 0 && (
+                <button
+                  onClick={handleVoltar}
+                  className="px-6 py-3 bg-transparent border border-amber-400 text-amber-400 rounded-full hover:bg-amber-400 hover:text-black transition-all"
+                >
+                  Voltar
+                </button>
+              )}
+              <button
+                onClick={handleProximo}
+                disabled={respostas[indice] === null}
+                className={`px-6 py-3 rounded-full text-black transition-all ${
+                  respostas[indice] === null
+                    ? "bg-neutral-600 cursor-not-allowed"
+                    : "bg-gradient-to-r from-amber-400 to-yellow-500 hover:opacity-90"
+                }`}
+              >
+                {indice === perguntas.length - 1 ? "Concluir" : "Seguinte"}
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="final"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="text-center"
+          >
+            <h2 className="text-2xl md:text-3xl mb-4">
+              Estamos calculando seu resultado...
+            </h2>
+            <p className="text-lg mb-8">
+              Clique abaixo para acessar o resultado completo e receber seus 2 e-books gratuitos.
+            </p>
             <button
-              onClick={handleBack}
-              disabled={current === 0}
-              className="px-6 py-3 rounded-full bg-gray-700 hover:bg-gray-600 disabled:opacity-40 transition"
+              className="px-8 py-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-black rounded-full font-semibold hover:opacity-90 transition-all"
+              onClick={() => (window.location.href = "/checkout")}
             >
-              Voltar
+              Ver Resultado
             </button>
 
-            {current < questions.length - 1 ? (
-              <button
-                onClick={handleNext}
-                disabled={answers[current] === null}
-                className="px-6 py-3 rounded-full bg-[#f59e0b] text-black font-semibold hover:brightness-110 disabled:opacity-40 transition"
-              >
-                Seguinte
-              </button>
-            ) : (
-              <button
-                onClick={handleFinish}
-                disabled={answers[current] === null}
-                className="px-6 py-3 rounded-full bg-[#f59e0b] text-black font-semibold hover:brightness-110 disabled:opacity-40 transition"
-              >
-                Concluir
-              </button>
-            )}
-          </div>
-        </>
-      ) : showLoading ? (
-        <motion.div
-          key="loading"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <p className="text-xl mb-6">Estamos calculando o seu resultado…</p>
-          <div className="w-10 h-10 border-4 border-[#f59e0b] border-t-transparent rounded-full animate-spin mx-auto"></div>
-        </motion.div>
-      ) : (
-        <motion.div
-          key="result"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <p className="text-xl mb-4">
-            Estamos calculando seu resultado…
-          </p>
-          <p className="text-xl mb-4">
-            Clique abaixo para acessar o resultado completo e receber os seus 2 e-books gratuitos.
-          </p>           
-          <a
-            href="/checkout"
-            className="inline-block mt-6 px-8 py-4 bg-[#f59e0b] text-black font-bold rounded-full hover:brightness-110 transition"
-          >
-            Ver Resultado
-          </a>
-        </motion.div>
-      )}
+            <p className="mt-8 text-sm text-neutral-400">
+              Sua pontuação total: {pontuacaoTotal} pontos
+            </p>
+          </motion.div>
+        )}
+      </div>
 
-      {/* Faixa de destaque no final da página */}
+      {/* Faixa de destaque final */}
       <FaixaDestaque />
     </div>
   );
