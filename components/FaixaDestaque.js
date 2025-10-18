@@ -9,7 +9,7 @@ export default function FaixaDestaque() {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       viewport={{ once: true }}
-      className="w-full bg-[#f59e0b]/10 py-0 px-0 mt-100 text-center border-t border-[#f59e0b]/100"
+      className="w-full bg-[#f59e0b]/10 py-0 px-0 mt-5 text-center border-t border-[#f59e0b]/5"
     >
       <p className="text-white text-sm sm:text-base max-w-3xl mx-auto leading-relaxed">
         <strong className="text-[#f59e0b]">Aviso Importante: </strong>  
