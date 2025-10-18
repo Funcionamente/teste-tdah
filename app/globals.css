@@ -2,32 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* fonte */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
 
-:root{
+:root {
   --orange-gold: #FFA733;
 }
 
-/* base */
-html, body, #__next { height: 100%; }
+html, body, #__next {
+  height: 100%;
+}
+
 body {
-  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  background: linear-gradient(180deg, #020202 0%, #0b0b0b 100%);
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%);
   color: #fff;
 }
 
-/* glass */
-.glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.45); border-radius: 1rem; }
+/* glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  border-radius: 1rem;
+}
 
-/* CTA */
-.btn-glass { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); color: var(--orange-gold); padding: 0.85rem 1.6rem; border-radius: 1rem; font-weight: 600; box-shadow: 0 8px 30px rgba(255,167,51,0.12); transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
-.btn-glass:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(255,167,51,0.18); background: rgba(255,255,255,0.12); }
+/* buttons */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--orange-gold);
+  padding: 0.85rem 1.6rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  box-shadow: 0 8px 30px rgba(255, 167, 51, 0.12);
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
 
-/* animações */
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.fadeInUp { animation: fadeInUp .8s ease both; }
+.btn-glass:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(255, 167, 51, 0.18);
+  background: rgba(255, 255, 255, 0.12);
+}
 
-/* util */
-.text-orange { color: var(--orange-gold); }
-.bg-orange { background: var(--orange-gold); }
+/* animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fadeInUp {
+  animation: fadeInUp 0.8s ease both;
+}
+
+/* utility */
+.text-orange {
+  color: var(--orange-gold);
+}
+
+.bg-orange {
+  background: var(--orange-gold);
+}
