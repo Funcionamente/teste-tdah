@@ -3,36 +3,36 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const questions = [
-  "Com que frequência você tem dificuldade em concluir os detalhes de um projeto após ter feito as partes mais difíceis?",
-  "Com que frequência você tem dificuldade em organizar tarefas que exigem muita concentração?",
-  "Com que frequência você evita ou adia tarefas que exigem muito pensamento?",
-  "Com que frequência você se distrai com facilidade por estímulos externos?",
-  "Com que frequência você deixa de prestar atenção em conversas, mesmo quando falam diretamente com você?",
-  "Com que frequência você perde ou esquece objetos importantes (chaves, celular, carteira)?",
-  "Com que frequência você se sente inquieto ou tem dificuldade em relaxar quando tem tempo livre?",
-  "Com que frequência você se sente impaciente em filas ou situações em que precisa esperar?",
-  "Com que frequência você interrompe os outros quando estão falando?",
-  "Com que frequência você fala demais em situações sociais?",
-  "Com que frequência você tem dificuldade em manter o foco em tarefas repetitivas ou demoradas?",
-  "Com que frequência você muda de atividade antes de concluir a anterior?",
-  "Com que frequência você sente que sua mente está acelerada, mesmo em momentos calmos?",
-  "Com que frequência você se sente sobrecarregado facilmente com múltiplas tarefas?",
-  "Com que frequência você precisa de lembretes constantes para compromissos ou prazos?",
-  "Com que frequência você toma decisões impulsivas sem pensar nas consequências?",
-  "Com que frequência você se sente distraído mesmo em ambientes silenciosos?",
-  "Com que frequência você sente que está sempre “ligado” ou não consegue parar de pensar?",
-  "Com que frequência você subestima o tempo necessário para realizar tarefas?",
-  "Com que frequência você se frustra com facilidade quando as coisas não saem como o esperado?",
-  "Com que frequência você sente que começa o dia produtivo, mas perde o ritmo rapidamente?",
-  "Com que frequência você perde o interesse em algo logo após começar?",
-  "Com que frequência você sente que precisa de pressão ou prazos para conseguir agir?",
-  "Com que frequência você sente dificuldade em priorizar tarefas importantes?",
-  "Com que frequência você se distrai durante leituras ou filmes?",
-  "Com que frequência você procrastina mesmo sabendo que isso te prejudica?",
-  "Com que frequência você sente que tem dificuldade em manter hábitos ou rotinas?",
-  "Com que frequência você se sente emocionalmente esgotado por pequenas coisas?",
-  "Com que frequência você sente dificuldade em ouvir instruções completas?",
-  "Com que frequência você se sente diferente das outras pessoas em como sua mente funciona?",
+  "Você tem dificuldade em organizar tarefas que exigem muita concentração?",
+  "Você evita ou adia tarefas que exigem muito pensamento?",
+  "Você se distrai com facilidade por estímulos externos?",
+  "Você deixa de prestar atenção em conversas, mesmo quando falam diretamente com você?",
+  "Você perde ou esquece objetos importantes (chaves, celular, carteira)?",
+  "Você se sente inquieto ou tem dificuldade em relaxar quando tem tempo livre?",
+  "Você tem dificuldade em concluir os detalhes de um projeto após ter feito as partes mais difíceis?",
+  "Você se sente impaciente em filas ou situações em que precisa esperar?",
+  "Você interrompe os outros quando estão falando?",
+  "Você fala demais em situações sociais?",
+  "Você tem dificuldade em manter o foco em tarefas repetitivas ou demoradas?",
+  "Você muda de atividade antes de concluir a anterior?",
+  "Você sente que sua mente está acelerada, mesmo em momentos calmos?",
+  "Você se sente sobrecarregado facilmente com múltiplas tarefas?",
+  "Você precisa de lembretes constantes para compromissos ou prazos?",
+  "Você toma decisões impulsivas sem pensar nas consequências?",
+  "Você se sente distraído mesmo em ambientes silenciosos?",
+  "Você sente que está sempre “ligado” ou não consegue parar de pensar?",
+  "Você subestima o tempo necessário para realizar tarefas?",
+  "Você se frustra com facilidade quando as coisas não saem como o esperado?",
+  "Você sente que começa o dia produtivo, mas perde o ritmo rapidamente?",
+  "Você perde o interesse em algo logo após começar?",
+  "Você sente que precisa de pressão ou prazos para conseguir agir?",
+  "Você sente dificuldade em priorizar tarefas importantes?",
+  "Você se distrai durante leituras ou filmes?",
+  "Você procrastina mesmo sabendo que isso te prejudica?",
+  "Você sente que tem dificuldade em manter hábitos ou rotinas?",
+  "Você se sente emocionalmente esgotado por pequenas coisas?",
+  "Você sente dificuldade em ouvir instruções completas?",
+  "Você se sente diferente das outras pessoas em como sua mente funciona?",
 ];
 
 const options = [
@@ -171,6 +171,7 @@ export default function TestePage() {
           className="text-center"
         >
           <p className="text-xl mb-4">
+            Estamos calculando seu resultado…
             Clique abaixo para acessar o resultado completo e receber os seus 2 e-books gratuitos.
           </p>
           <a
