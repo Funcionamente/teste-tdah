@@ -11,7 +11,7 @@ export default function Home() {
         <img
           src="/tdah-symbol.png"
           alt="Símbolo TDAH"
-          className="w-32 h-32 mb-16 z-18 animate-fadeIn"
+          className="w-64 h-64 mb-48 z-50 animate-fadeIn"
           style={{ animationDelay: "0.1s" }}
         />
 
