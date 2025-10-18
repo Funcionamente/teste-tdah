@@ -11,12 +11,12 @@ export default function Home() {
         <img
           src="/tdah-symbol.png"
           alt="Símbolo TDAH"
-          className="w-64 h-64 mb-48 z-50 animate-fadeIn"
+          className="w-120 h-120 mb-8 z-10 animate-fadeIn"
           style={{ animationDelay: "0.1s" }}
         />
 
         <h1 className="text-4xl md:text-6xl font-bold mb-6 z-10 leading-tight">
-          Descubra se seus desafios de foco e atenção
+          Descubra se os seus desvios de foco e atenção
           <br />
           têm relação com o <span className="text-[#FFA733]">TDAH</span>
         </h1>
