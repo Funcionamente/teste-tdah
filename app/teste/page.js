@@ -160,13 +160,6 @@ export default function TestePage() {
           animate={{ opacity: 1 }}
           className="text-center"
         >
-             {/* SEÇÃO 7 - FAIXA DESTAQUE FINAL */}
-      <section className="py-6 px-6 text-center bg-black text-zinc-400 text-sm border-t border-zinc-800">
-        <p>
-          Este teste foi desenvolvido seguindo padrões internacionais de triagem em saúde mental (ASRS v1.1) e respeita as normas
-          éticas e de privacidade. É uma ferramenta informativa e não substitui diagnóstico médico ou psicológico.
-        </p>
-      </section>
           <p className="text-xl mb-6">Estamos calculando o seu resultado…</p>
           <div className="w-10 h-10 border-4 border-[#f59e0b] border-t-transparent rounded-full animate-spin mx-auto"></div>
         </motion.div>
@@ -192,12 +185,5 @@ export default function TestePage() {
         </motion.div>
       )}
     </div>
- {/* SEÇÃO 7 - FAIXA DESTAQUE FINAL */}
-      <section className="py-6 px-6 text-center bg-black text-zinc-400 text-sm border-t border-zinc-800">
-        <p>
-          Este teste foi desenvolvido seguindo padrões internacionais de triagem em saúde mental (ASRS v1.1) e respeita as normas
-          éticas e de privacidade. É uma ferramenta informativa e não substitui diagnóstico médico ou psicológico.
-        </p>
-      </section>
   );
 }
