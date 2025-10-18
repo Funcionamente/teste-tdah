@@ -40,7 +40,7 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {[
             "… tem dificuldade em manter o foco por muito tempo?",
-            "… começa várias tarefas mas raramente as conclui?",
+            "… começa várias tarefas, mas raramente as conclui?",
             "… se sente sobrecarregado facilmente ou esquece compromissos importantes?",
           ].map((text, i) => (
             <div
@@ -111,7 +111,7 @@ export default function Home() {
             },
             {
               name: "Renata G.",
-              text: "Foi libertador entender que meu jeito de funcionar tem explicação e pode ser equilibrado.",
+              text: "Foi libertador! Foi o ponto de partida para eu buscar ajuda profissional, iniciar o tratamento e melhorar a minha rotina.",
             },
           ].map((d, i) => (
             <div
