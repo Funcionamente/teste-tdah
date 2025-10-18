@@ -1,16 +1,14 @@
-import "./globals.css";
+import './globals.css';
 
 export const metadata = {
-  title: "Teste TDAH",
-  description: "Avalie seu nível de atenção e foco de forma profissional e interativa para saber se possui traços de TDAH",
+  title: 'Teste TDAH',
+  description: 'Descubra se você possui traços de TDAH com base em padrões internacionais de saúde mental.',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
-      <body className="min-h-screen text-white antialiased">
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
