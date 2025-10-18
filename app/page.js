@@ -11,7 +11,7 @@ export default function Home() {
         <img
           src="/tdah-symbol.png"
           alt="Símbolo TDAH"
-          className="w-24 h-24 mb-8 z-10 animate-fadeIn"
+          className="w-32 h-32 mb-16 z-18 animate-fadeIn"
           style={{ animationDelay: "0.1s" }}
         />
 
@@ -62,7 +62,7 @@ export default function Home() {
         <h2 className="text-3xl md:text-4xl font-bold mb-6">O que é o TDAH?</h2>
         <p className="max-w-4xl mx-auto text-lg font-medium leading-relaxed">
           O TDAH é um transtorno neurobiológico caracterizado por sintomas de desatenção, impulsividade e hiperatividade.
-          Ele pode afetar o desempenho no trabalho, nos estudos e nas relações pessoais — mas é totalmente possível
+          Ele pode afetar o desempenho no trabalho, nos estudos e nas relações pessoais, mas é totalmente possível
           aprender a gerenciar e equilibrar esses traços com orientação adequada.
         </p>
       </section>
@@ -83,6 +83,10 @@ export default function Home() {
             {
               title: "Próximos passos",
               text: "Saiba se é o momento de buscar avaliação profissional.",
+            },
+            {
+              title: "Ganhe 2 e-books grátis",
+              text: "Receba gratuitamente os e-books Explicando o TDAH e Como o TDAH afeta relacionamentos.",
             },
           ].map((item, i) => (
             <div
