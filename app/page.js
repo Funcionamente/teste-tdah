@@ -74,13 +74,9 @@ export default function Home() {
           {[
             {
               title: "Autoconhecimento",
-              text: "Entenda melhor seus padrões de comportamento e foco.",
+              text: "Entenda melhor seus padrões de comportamento, foco e como o TDAH pode estar influenciando sua produtividade e relacionamentos.",
             },
-            {
-              title: "Clareza emocional",
-              text: "Descubra como o TDAH pode estar influenciando sua produtividade e relacionamentos.",
-            },
-            {
+                        {
               title: "Próximos passos",
               text: "Saiba se é o momento de buscar avaliação profissional.",
             },
