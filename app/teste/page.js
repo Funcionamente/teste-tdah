@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import FaixaDestaque from "@/components/FaixaDestaque";
 
 const questions = [
   "Você tem dificuldade em organizar tarefas que exigem muita concentração?",
@@ -184,6 +185,9 @@ export default function TestePage() {
           </a>
         </motion.div>
       )}
+
+      {/* Faixa de destaque no final da página */}
+      <FaixaDestaque />
     </div>
   );
 }
