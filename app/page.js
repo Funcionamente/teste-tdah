@@ -1,55 +1,41 @@
 "use client";
-import { motion } from "framer-motion";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-white">
       {/* HERO SECTION */}
       <section className="relative flex flex-col items-center justify-center text-center py-24 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_#FFA73333,_transparent_70%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_#FFA73333,_transparent_70%)] pointer-events-none"></div>
 
-        <motion.img
-          src="/tdah-symbol.png" // coloque aqui o símbolo do TDAH
+        {/* Símbolo do TDAH - coloque public/tdah-symbol.png */}
+        <img
+          src="/tdah-symbol.png"
           alt="Símbolo TDAH"
-          className="w-24 h-24 mb-8 z-10"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
+          className="w-24 h-24 mb-8 z-10 animate-fadeIn"
+          style={{ animationDelay: "0.1s" }}
         />
 
-        <motion.h1
-          className="text-4xl md:text-6xl font-bold mb-6 z-10"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-        >
-          Descubra se seus desafios de foco e atenção<br />
+        <h1 className="text-4xl md:text-6xl font-bold mb-6 z-10 leading-tight">
+          Descubra se seus desafios de foco e atenção
+          <br />
           têm relação com o <span className="text-[#FFA733]">TDAH</span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          className="max-w-2xl text-zinc-300 mb-10 z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
+        <p className="max-w-2xl text-zinc-300 mb-10 z-10">
           Um teste rápido e preciso para identificar traços de desatenção, impulsividade e hiperatividade em adultos.
-        </motion.p>
+        </p>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="px-8 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-[#FFA733] font-semibold shadow-[0_0_20px_#FFA73355] transition"
+        <a
+          href="/teste"
+          className="inline-block px-8 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-[#FFA733] font-semibold shadow-[0_0_20px_#FFA73355] transition-transform transform hover:-translate-y-1"
         >
           Fazer o teste agora
-        </motion.button>
+        </a>
       </section>
 
       {/* SEÇÃO 2 - VOCÊ JÁ SE PERGUNTOU... */}
       <section className="py-20 px-6 bg-black/80 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-12">
-          Você já se perguntou por que...
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-12">Você já se perguntou por que...</h2>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {[
@@ -57,13 +43,12 @@ export default function Home() {
             "… começa várias tarefas mas raramente as conclui?",
             "… se sente sobrecarregado facilmente ou esquece compromissos importantes?",
           ].map((text, i) => (
-            <motion.div
+            <div
               key={i}
-              whileHover={{ scale: 1.03 }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg"
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1"
             >
               <p className="text-zinc-200">{text}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -100,23 +85,20 @@ export default function Home() {
               text: "Saiba se é o momento de buscar avaliação profissional.",
             },
           ].map((item, i) => (
-            <motion.div
+            <div
               key={i}
-              whileHover={{ scale: 1.05 }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-xl"
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-transform transform hover:-translate-y-1"
             >
               <h3 className="text-xl font-semibold mb-3 text-[#FFA733]">{item.title}</h3>
               <p className="text-zinc-300">{item.text}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
 
       {/* SEÇÃO 5 - DEPOIMENTOS */}
       <section className="py-20 px-6 bg-zinc-900/70 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-12">
-          O que dizem as pessoas que já fizeram o teste
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-12">O que dizem as pessoas que já fizeram o teste</h2>
         <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
           {[
             {
@@ -132,35 +114,27 @@ export default function Home() {
               text: "Foi libertador entender que meu jeito de funcionar tem explicação e pode ser equilibrado.",
             },
           ].map((d, i) => (
-            <motion.div
+            <div
               key={i}
-              whileHover={{ scale: 1.03 }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg"
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1"
             >
               <p className="text-zinc-300 italic mb-4">"{d.text}"</p>
               <p className="text-[#FFA733] font-semibold">{d.name}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
 
       {/* SEÇÃO 6 - CTA FINAL */}
       <section className="py-24 px-6 text-center relative">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_#FFA73322,_transparent_70%)]"></div>
-        <motion.h2
-          className="text-3xl md:text-5xl font-bold mb-8 z-10 relative"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-        >
-          Pronto para descobrir se você tem traços de TDAH?
-        </motion.h2>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="px-10 py-5 rounded-2xl bg-[#FFA733] text-black font-bold shadow-[0_0_25px_#FFA73388] transition z-10 relative"
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_#FFA73322,_transparent_70%)] pointer-events-none"></div>
+        <h2 className="text-3xl md:text-5xl font-bold mb-8 z-10 relative">Pronto para descobrir se você tem traços de TDAH?</h2>
+        <a
+          href="/teste"
+          className="inline-block px-10 py-5 rounded-2xl bg-[#FFA733] text-black font-bold shadow-[0_0_25px_#FFA73388] transition-transform transform hover:-translate-y-1"
         >
           Iniciar meu teste agora
-        </motion.button>
+        </a>
       </section>
 
       {/* SEÇÃO 7 - FAIXA DESTAQUE FINAL */}
@@ -170,6 +144,17 @@ export default function Home() {
           éticas e de privacidade. É uma ferramenta informativa e não substitui diagnóstico médico ou psicológico.
         </p>
       </section>
+
+      {/* Pequenas animações via CSS */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.9s ease both;
+        }
+      `}</style>
     </main>
   );
 }
