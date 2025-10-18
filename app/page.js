@@ -27,9 +27,9 @@ export default function Home() {
 
         <a
           href="/teste"
-          className="inline-block px-8 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-[#FFA733] font-semibold shadow-[0_0_20px_#FFA73355] transition-transform transform hover:-translate-y-1"
+          className="inline-block px-10 py-5 rounded-2xl bg-[#FFA733] text-black font-bold shadow-[0_0_25px_#FFA73388] transition-transform transform hover:-translate-y-1"
         >
-          Fazer o teste agora
+          Iniciar meu teste agora
         </a>
       </section>
 
@@ -53,7 +53,7 @@ export default function Home() {
         </div>
 
         <p className="max-w-3xl mx-auto mt-12 text-zinc-400">
-          Esses podem ser sinais de <span className="text-[#FFA733]">Traços de TDAH</span> (Transtorno de Déficit de Atenção e Hiperatividade) — um padrão de funcionamento cerebral que afeta milhões de adultos em todo o mundo.
+          Esses podem ser sinais de <span className="text-[#FFA733]">Traços de TDAH</span> (Transtorno de Déficit de Atenção e Hiperatividade), um padrão de funcionamento cerebral que afeta milhões de adultos em todo o mundo.
         </p>
       </section>
 
