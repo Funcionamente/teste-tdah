@@ -162,10 +162,10 @@ export default function TesteTDAH() {
               Ver Resultado
             </button>
 
-            /*<p className="mt-8 text-sm text-neutral-400">
+            {/*<p className="mt-8 text-sm text-neutral-400">
               Sua pontuação total: {pontuacaoTotal} pontos
             </p>
-          </motion.div>*/
+          </motion.div>*/}
         )}
       </div>
 
