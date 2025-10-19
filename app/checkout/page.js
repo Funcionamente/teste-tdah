@@ -65,7 +65,7 @@ export default function CheckoutPage() {
             transition={{ duration: 0.5 }}
           >
             <Link
-              href="https://www.mercadopago.com.br/seu-link-de-pagamento-aqui"
+              href="https://mpago.la/1mPF3si"
               target="_blank"
               className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-10 rounded-full shadow-lg transition-all duration-300 hover:shadow-orange-500/40 backdrop-blur-md bg-opacity-90"
             >
