@@ -1,22 +1,9 @@
 "use client";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  // Simula o callback do webhook após pagamento confirmado
-  const handlePayment = async () => {
-    setLoading(true);
-
-    // Simulação: aguarda 3 segundos (em produção, o webhook do Mercado Pago chamaria sua API)
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/resultado?paid=true");
-    }, 3000);
-  };
+  const paymentLink =
+    "https://mpago.la/1mPF3si; // 🔗 substitua pelo seu link
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white">
@@ -27,7 +14,7 @@ export default function CheckoutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          🧠 Acesse seu resultado completo e receba seus 2 e-books agora mesmo
+          🧠 Acesse o seu resultado completo e receba os seus 2 e-books agora mesmo
         </motion.h1>
       </header>
 
@@ -66,35 +53,24 @@ export default function CheckoutPage() {
             <p>Pagamento 100% seguro via Mercado Pago</p>
           </div>
 
-          {!loading ? (
-            <motion.div
-              className="mt-10"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+          <motion.div
+            className="mt-10"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <a
+              href={paymentLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-10 rounded-full shadow-lg transition-all duration-300 hover:shadow-orange-500/40 backdrop-blur-md bg-opacity-90"
             >
-              <button
-                onClick={handlePayment}
-                className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-10 rounded-full shadow-lg transition-all duration-300 hover:shadow-orange-500/40 backdrop-blur-md bg-opacity-90"
-              >
-                ACESSAR MEU RESULTADO AGORA
-              </button>
-              <p className="text-sm text-gray-400 mt-3">
-                (pagamento único, acesso imediato após confirmação)
-              </p>
-            </motion.div>
-          ) : (
-            <motion.div
-              className="mt-10 text-center flex flex-col items-center justify-center space-y-3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <div className="w-10 h-10 border-4 border-t-orange-400 border-gray-600 rounded-full animate-spin" />
-              <p className="text-orange-300 text-lg font-semibold">
-                Verificando pagamento...
-              </p>
-            </motion.div>
-          )}
+              ACESSAR MEU RESULTADO AGORA
+            </a>
+            <p className="text-sm text-gray-400 mt-3">
+              (pagamento único, acesso imediato após confirmação)
+            </p>
+          </motion.div>
         </motion.div>
       </main>
 
