@@ -150,10 +150,10 @@ export default function TesteTDAH() {
             className="text-center"
           >
             <h2 className="text-2xl md:text-3xl mb-4">
-              Estamos calculando seu resultado...
+              Estamos calculando o seu resultado...
             </h2>
             <p className="text-lg mb-8">
-              Clique abaixo para acessar o resultado completo e receber seus 2 e-books gratuitos.
+              Clique abaixo para acessar o resultado completo e receber os seus 2 e-books gratuitos.
             </p>
             <button
               className="px-8 py-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-black rounded-full font-semibold hover:opacity-90 transition-all"
@@ -162,10 +162,10 @@ export default function TesteTDAH() {
               Ver Resultado
             </button>
 
-            <p className="mt-8 text-sm text-neutral-400">
+            /*<p className="mt-8 text-sm text-neutral-400">
               Sua pontuação total: {pontuacaoTotal} pontos
             </p>
-          </motion.div>
+          </motion.div>*/
         )}
       </div>
 
