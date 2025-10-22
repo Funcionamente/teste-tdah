@@ -117,31 +117,32 @@ export default function ResultadoSimulado() {
           <h3 className="text-[#ffb347] font-bold mb-4 text-center">
             📊 Faixas de Interpretação
           </h3>
-          <div className="w-full h-4 bg-[#333] rounded-full relative mb-2">
+        
+          {/* Barra colorida dividida */}
+          <div className="relative w-full h-4 rounded-full overflow-hidden mb-8 flex">
+            <div className="flex-1 bg-[#1db954]" /> {/* Verde */}
+            <div className="flex-1 bg-[#ffb347]" /> {/* Amarelo */}
+            <div className="flex-1 bg-[#ff4c4c]" /> {/* Vermelho */}
+        
+            {/* Marcador da pontuação */}
             <div
-              className="h-4 rounded-full"
-              style={{
-                width: `${(pontuacao / total) * 100}%`,
-                backgroundColor: faixa.cor,
-              }}
-            ></div>
-            <span
-              className="absolute top-[-8px] text-sm font-bold"
+              className="absolute top-1/2 -translate-y-1/2"
               style={{
                 left: `${(pontuacao / total) * 100}%`,
-                transform: "translateX(-50%)",
-                color: faixa.cor,
+                transform: "translate(-50%, -50%)",
               }}
             >
-              {pontuacao}
-            </span>
+              <div className="w-10 h-10 bg-[#ffb347] rounded-full flex items-center justify-center text-black font-bold shadow-lg border-2 border-[#0a0a0a]">
+                {pontuacao}
+              </div>
+            </div>
           </div>
-
+        
           <ul className="text-sm text-gray-300 space-y-2 mt-3">
             <li>
               <span className="text-[#1db954] font-semibold">0 a 50:</span>{" "}
-              Baixa probabilidade — indica baixa tendência a sintomas
-              relacionados ao TDAH.
+              Baixa probabilidade — indica baixa tendência a sintomas relacionados ao
+              TDAH.
             </li>
             <li>
               <span className="text-[#ffb347] font-semibold">51 a 100:</span>{" "}
@@ -155,33 +156,6 @@ export default function ResultadoSimulado() {
             </li>
           </ul>
         </motion.div>
-
-        {/* E-books */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="mt-10 text-center"
-        >
-          <h3 className="text-[#ffb347] font-bold text-lg mb-4">
-            📘 E-books Recomendados
-          </h3>
-          <div className="flex flex-col gap-4">
-            <a
-              href="#"
-              className="bg-gradient-to-r from-[#ff7a00] to-[#ffb347] text-black font-semibold py-3 px-6 rounded-xl shadow-lg hover:opacity-90 transition"
-            >
-              📗 Baixar E-book – Explicando o TDAH
-            </a>
-            <a
-              href="#"
-              className="bg-gradient-to-r from-[#ff7a00] to-[#ffb347] text-black font-semibold py-3 px-6 rounded-xl shadow-lg hover:opacity-90 transition"
-            >
-              ❤️ Baixar E-book – Como o TDAH Afeta Relacionamentos
-            </a>
-          </div>
-        </motion.div>
-      </motion.div>
 
       {/* Faixa Final */}
       <motion.div
