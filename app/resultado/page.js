@@ -1,103 +1,199 @@
 "use client";
+
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import FaixaDestaque from "@/components/FaixaDestaque";
 
-export default function ResultadoPage() {
-  const [resultado, setResultado] = useState(null);
+export default function ResultadoSimulado() {
+  const pontuacao = 87;
+  const total = 150;
 
-  // Simulação de dados de resultado
-  useEffect(() => {
-    const pontuacao = 87; // 🔸 Exemplo fictício
-    let faixa, explicacao, recomendacao;
-
+  const getFaixa = (pontuacao) => {
     if (pontuacao <= 50) {
-      faixa = "Baixa probabilidade";
-      explicacao = "Você não possui indícios de TDAH.";
-      recomendacao = "Caso discorde do resultado, procure um profissional de saúde mental (psiquiatra ou psicólogo) para uma avaliação mais aprofundada.";
+      return {
+        titulo: "Baixa Probabilidade",
+        cor: "#1db954",
+        explicacao: "Você não possui indícios de TDAH.",
+        recomendacao:
+          "Caso discorde do resultado, procure um profissional de saúde mental (psiquiatra ou psicólogo) para uma avaliação mais aprofundada.",
+      };
     } else if (pontuacao <= 100) {
-      faixa = "Indícios moderados";
-      explicacao = "Você possui traços moderados de TDAH. Isso significa que alguns dos seus comportamentos podem estar relacionados a sintomas típicos de TDAH, como distração, impulsividade ou dificuldade de foco.";
-      recomendacao = "Procure um profissional de saúde mental (psiquiatra ou psicólogo) para uma avaliação mais aprofundada, que se confirmada, irá te indicar o melhor tratamento para o seu caso.";
+      return {
+        titulo: "Indícios Moderados",
+        cor: "#ffb347",
+        explicacao:
+          "Você possui traços moderados de TDAH. Isso significa que alguns dos seus comportamentos podem estar relacionados a sintomas típicos de TDAH, como distração, impulsividade ou dificuldade de foco.",
+        recomendacao:
+          "Procure um profissional de saúde mental (psiquiatra ou psicólogo) para uma avaliação mais aprofundada, que se confirmada, irá te indicar o melhor tratamento para o seu caso.",
+      };
     } else {
-      faixa = "Alta probabilidade";
-      explicacao = "Você possui fortes indícios de TDAH. Isso significa que os seus comportamentos podem estar relacionados a sintomas típicos de TDAH, como desatenção, hiperatividade e impulsividade (inquietação, agitação, dificuldade de esperar a sua vez, falar excessivamente e interromper os outros).";
-      recomendacao = "Procure um profissional de saúde mental (psiquiatra ou psicólogo) para uma avaliação mais aprofundada, que se confirmado TDAH, irá te indicar o melhor tratamento para o seu caso.";
+      return {
+        titulo: "Alta Probabilidade",
+        cor: "#ff4c4c",
+        explicacao:
+          "Você possui fortes indícios de TDAH. Isso significa que os seus comportamentos podem estar relacionados a sintomas típicos de TDAH, como desatenção, hiperatividade e impulsividade (inquietação, agitação, dificuldade de esperar a sua vez, falar excessivamente e interromper os outros).",
+        recomendacao:
+          "Procure um profissional de saúde mental (psiquiatra ou psicólogo) para uma avaliação mais aprofundada, que se confirmado TDAH, irá te indicar o melhor tratamento para o seu caso.",
+      };
     }
+  };
 
-    setResultado({ pontuacao, faixa, explicacao, recomendacao });
-  }, []);
-
-  if (!resultado) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-white bg-[#0a0a0a]">
-        <p>Carregando resultado...</p>
-      </div>
-    );
-  }
+  const faixa = getFaixa(pontuacao);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center px-4 py-10">
       <motion.h1
-        className="text-3xl font-bold text-center text-orange-400 mb-6"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.8 }}
+        className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#ffb347]"
       >
         ✅ Resultado do seu Teste de Atenção e Foco (base OMS)
       </motion.h1>
 
       <motion.div
-        className="bg-[#1c1c1c] rounded-2xl p-8 max-w-xl w-full text-center shadow-lg"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.7 }}
+        className="bg-[#1c1c1c] rounded-2xl shadow-xl p-6 max-w-xl w-full border border-[#2a2a2a]"
       >
-        <h2 className="text-2xl font-semibold text-orange-300 mb-2">
-          Sua pontuação: {resultado.pontuacao} de 150
-        </h2>
-        <p className="text-lg font-medium mb-4">
-          Faixa: <span className="text-orange-400">{resultado.faixa}</span>
-        </p>
+        <div className="flex flex-col items-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.7, type: "spring" }}
+            className="relative flex items-center justify-center w-32 h-32 rounded-full"
+            style={{
+              background: `conic-gradient(${faixa.cor} ${(pontuacao / total) * 100}%, #333 0%)`,
+            }}
+          >
+            <div className="absolute bg-[#0a0a0a] w-24 h-24 rounded-full flex flex-col items-center justify-center">
+              <p className="text-xl font-bold text-[#ffb347]">
+                {pontuacao}/{total}
+              </p>
+              <p className="text-xs text-gray-400">Sua pontuação</p>
+            </div>
+          </motion.div>
 
-        <p className="mb-4 text-gray-200">{resultado.explicacao}</p>
-        <p className="mb-6 text-gray-300">{resultado.recomendacao}</p>
+          <div className="text-center mt-6">
+            <p className="text-lg font-semibold text-[#ffb347]">
+              FAIXA: {faixa.titulo}
+            </p>
+            <p className="text-sm text-gray-300 mt-2">{faixa.explicacao}</p>
+          </div>
 
-        <div className="border-t border-gray-700 my-6"></div>
+          <div className="w-full mt-6 space-y-4">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-gradient-to-r from-[#ff7a00] to-[#ffb347] rounded-xl p-4 text-black font-medium"
+            >
+              <p>🔸 PRÓXIMO PASSO:</p>
+              <p className="text-sm mt-1">{faixa.recomendacao}</p>
+            </motion.div>
 
-        <div className="text-left">
-          <h3 className="text-xl font-semibold text-orange-400 mb-3 text-center">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-[#222] border border-[#333] rounded-xl p-4"
+            >
+              <p className="text-[#ffb347] font-semibold">💡 REFLITA:</p>
+              <p className="text-sm text-gray-300 mt-1">
+                Analise seus hábitos. Se estes sintomas estão impactando
+                significativamente sua rotina, o acompanhamento profissional é
+                fundamental.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Barra de Faixas */}
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 1 }}
+          className="mt-10 bg-[#111] p-5 rounded-xl"
+        >
+          <h3 className="text-[#ffb347] font-bold mb-4 text-center">
             📊 Faixas de Interpretação
           </h3>
-          <ul className="text-gray-300 space-y-2 text-sm">
-            <li><b>0 a 50:</b> Baixa probabilidade — Resultados indicam baixa tendência a sintomas relacionados ao TDAH.</li>
-            <li><b>51 a 100:</b> Indícios moderados — Alguns sinais podem estar presentes. Reflita sobre seus hábitos e procure acompanhamento se os sintomas impactam sua rotina.</li>
-            <li><b>101 a 150:</b> Alta probabilidade — Resultados apontam para sinais significativos de TDAH. É importante buscar orientação profissional.</li>
+          <div className="w-full h-4 bg-[#333] rounded-full relative mb-2">
+            <div
+              className="h-4 rounded-full"
+              style={{
+                width: `${(pontuacao / total) * 100}%`,
+                backgroundColor: faixa.cor,
+              }}
+            ></div>
+            <span
+              className="absolute top-[-8px] text-sm font-bold"
+              style={{
+                left: `${(pontuacao / total) * 100}%`,
+                transform: "translateX(-50%)",
+                color: faixa.cor,
+              }}
+            >
+              {pontuacao}
+            </span>
+          </div>
+
+          <ul className="text-sm text-gray-300 space-y-2 mt-3">
+            <li>
+              <span className="text-[#1db954] font-semibold">0 a 50:</span>{" "}
+              Baixa probabilidade — indica baixa tendência a sintomas
+              relacionados ao TDAH.
+            </li>
+            <li>
+              <span className="text-[#ffb347] font-semibold">51 a 100:</span>{" "}
+              Indícios moderados — alguns sinais podem estar presentes; procure
+              acompanhamento se os sintomas impactam sua rotina.
+            </li>
+            <li>
+              <span className="text-[#ff4c4c] font-semibold">101 a 150:</span>{" "}
+              Alta probabilidade — indica sinais significativos de TDAH; busque
+              orientação profissional.
+            </li>
           </ul>
-        </div>
+        </motion.div>
 
-        <div className="border-t border-gray-700 my-6"></div>
-
-        <h3 className="text-xl font-semibold text-orange-400 mb-3 text-center">
-          🎁 Seus E-books Gratuitos
-        </h3>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <a
-            href="#"
-            className="bg-orange-500 hover:bg-orange-600 transition text-white font-semibold px-6 py-3 rounded-full shadow-md"
-          >
-            📘 Baixar E-book - Explicando o TDAH
-          </a>
-          <a
-            href="#"
-            className="bg-orange-500 hover:bg-orange-600 transition text-white font-semibold px-6 py-3 rounded-full shadow-md"
-          >
-            ❤️ Baixar E-book - Como o TDAH Afeta Relacionamentos
-          </a>
-        </div>
+        {/* E-books */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="mt-10 text-center"
+        >
+          <h3 className="text-[#ffb347] font-bold text-lg mb-4">
+            📘 E-books Recomendados
+          </h3>
+          <div className="flex flex-col gap-4">
+            <a
+              href="#"
+              className="bg-gradient-to-r from-[#ff7a00] to-[#ffb347] text-black font-semibold py-3 px-6 rounded-xl shadow-lg hover:opacity-90 transition"
+            >
+              📗 Baixar E-book – Explicando o TDAH
+            </a>
+            <a
+              href="#"
+              className="bg-gradient-to-r from-[#ff7a00] to-[#ffb347] text-black font-semibold py-3 px-6 rounded-xl shadow-lg hover:opacity-90 transition"
+            >
+              ❤️ Baixar E-book – Como o TDAH Afeta Relacionamentos
+            </a>
+          </div>
+        </motion.div>
       </motion.div>
 
-      <FaixaDestaque />
+      {/* Faixa Final */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.3 }}
+        className="mt-12 text-center"
+      >
+        <p className="text-gray-400 text-sm">
+          © 2025 Funcionamente — Todos os direitos reservados.
+        </p>
+      </motion.div>
     </div>
   );
 }
