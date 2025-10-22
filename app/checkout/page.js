@@ -82,7 +82,7 @@ export default function CheckoutPage() {
       <footer className="bg-black/80 text-gray-300 text-sm text-center py-6 mt-16 border-t border-gray-800">
         <p>
           Este teste foi desenvolvido seguindo padrões internacionais de triagem
-          em saúde mental e respeita as normas éticas e de privacidade. É uma
+          em saúde mental (ASRS v1.1) e respeita as normas éticas e de privacidade. É uma
           ferramenta informativa e não substitui diagnóstico médico ou
           psicológico.
         </p>
