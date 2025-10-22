@@ -126,7 +126,7 @@ export default function ResultadoSimulado() {
         
             {/* Marcador da pontuação */}
             <div
-              className="absolute top-1/2"
+              className="absolute top-1/2 -translate-y-1/2"
               style={{
                 left: `${(pontuacao / total) * 100}%`,
                 transform: "translate(-50%, -50%)",
