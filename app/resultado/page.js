@@ -132,7 +132,7 @@ export default function ResultadoSimulado() {
                 transform: "translate(-50%, -50%)",
               }}
             >
-              <div className="w-10 h-10 bg-[#ffb347] rounded-full flex items-center justify-center text-black font-bold shadow-lg border-2 border-[#0a0a0a]">
+              <div className="w-10 h-10 bg-[#ffffff] rounded-full flex items-center justify-center text-black font-bold shadow-lg border-2 border-[#0a0a0a]">
                 {pontuacao}
               </div>
             </div>
