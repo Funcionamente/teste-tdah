@@ -129,7 +129,7 @@ export default function ResultadoSimulado() {
               className="absolute top-1/2"
               style={{
                 left: `${(pontuacao / total) * 100}%`,
-                transform: "translate(0%, 0%)",
+                transform: "translate(-50%, -50%)",
               }}
             >
               <div className="w-10 h-10 bg-[#ffffff] rounded-full flex items-center justify-center text-black font-bold shadow-lg border-2 border-[#0a0a0a]">
