@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
@@ -15,7 +15,7 @@ export default function Resultado() {
   const [erro, setErro] = useState(null);
 
   const total = 150;
-  const supabase = createClient();
+  // já está importado, então pode remover essa linha completamente
 
   useEffect(() => {
     async function fetchResultado() {
