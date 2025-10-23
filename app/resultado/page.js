@@ -182,6 +182,39 @@ export default function Resultado() {
           </ul>
         </motion.div>
 
+        {/* Seção de E-books */}
+        <motion.div
+          className="mt-12 p-6 bg-gray-50 rounded-2xl shadow-md text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            🎁 Seus E-books Exclusivos
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Clique abaixo para baixar gratuitamente seus materiais de apoio:
+          </p>
+        
+          <div className="flex flex-col md:flex-row justify-center gap-4">
+            <a
+              href="/ebooks/Explicando-o-TDAH.pdf"
+              download
+              className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow hover:bg-blue-700 transition"
+            >
+              📘 Baixar E-book – Explicando o TDAH
+            </a>
+        
+            <a
+              href="/ebooks/Como-o-TDAH-Afeta-Relacionamentos.pdf"
+              download
+              className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-xl shadow hover:bg-purple-700 transition"
+            >
+              ❤️ Baixar E-book – Como o TDAH Afeta Relacionamentos
+            </a>
+          </div>
+        </motion.div>
+
         {/* Faixa final de destaque */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
