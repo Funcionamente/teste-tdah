@@ -1,8 +1,44 @@
 "use client";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { useState } from "react";
 
 export default function CheckoutPage() {
+  const [loading, setLoading] = useState(false);
+
+  // Função chamada ao clicar no botão
+  const handlePayment = async () => {
+    try {
+      setLoading(true);
+
+      // Gera um ID único (exemplo: o id do resultado do usuário)
+      const referenceId = crypto.randomUUID();
+
+      const response = await fetch("/api/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          referenceId,
+          title: "Teste de Atenção e Foco + 2 eBooks",
+          price: 4.99,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.init_point) {
+        window.open(data.init_point, "_blank"); // abre checkout do MP
+      } else {
+        alert("Erro ao criar o link de pagamento. Tente novamente.");
+        console.error("Erro:", data);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao iniciar o pagamento.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white">
       {/* Título */}
@@ -38,7 +74,6 @@ export default function CheckoutPage() {
           {/* Selo de segurança */}
           <div className="mt-8 flex items-center justify-center space-x-2 text-gray-300 text-sm">
             <div className="w-5 h-5">
-              {/* Ícone de cadeado SVG inline */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -57,20 +92,22 @@ export default function CheckoutPage() {
             <p>Pagamento 100% seguro via Mercado Pago</p>
           </div>
 
-          {/* Botão de pagamento */}
+          {/* Botão de pagamento dinâmico */}
           <motion.div
             className="mt-10"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <Link
-              href="https://mpago.la/1mPF3si"
-              target="_blank"
-              className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-10 rounded-full shadow-lg transition-all duration-300 hover:shadow-orange-500/40 backdrop-blur-md bg-opacity-90"
+            <button
+              onClick={handlePayment}
+              disabled={loading}
+              className={`inline-block ${
+                loading ? "bg-gray-500 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600"
+              } text-white font-semibold py-4 px-10 rounded-full shadow-lg transition-all duration-300 hover:shadow-orange-500/40 backdrop-blur-md bg-opacity-90`}
             >
-              ACESSAR MEU RESULTADO AGORA
-            </Link>
+              {loading ? "Gerando link de pagamento..." : "ACESSAR MEU RESULTADO AGORA"}
+            </button>
             <p className="text-sm text-gray-400 mt-3">
               (Pagamento único. Após a confirmação, você será redirecionado automaticamente para ver o seu resultado.)
             </p>
