@@ -1,59 +1,44 @@
 import { NextResponse } from "next/server";
 
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || "https://seudominio.com"; // ajuste para o seu domínio
-
-export async function POST(req) {
+export async function POST() {
   try {
-    const body = await req.json();
-    const { referenceId, title, price } = body;
-
-    // Verificações básicas
-    if (!referenceId || !title || !price) {
-      return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
-    }
-
-    // Criação da preferência no Mercado Pago
-    const preference = {
-      items: [
-        {
-          title,
-          quantity: 1,
-          currency_id: "BRL",
-          unit_price: parseFloat(price),
-        },
-      ],
-      external_reference: referenceId, // usado para identificar o pagamento no webhook
-      back_urls: {
-        success: `${DOMAIN}/resultado?ref=${referenceId}`,
-        failure: `${DOMAIN}/checkout`,
-        pending: `${DOMAIN}/checkout`,
-      },
-      auto_return: "approved",
-      notification_url: `${DOMAIN}/api/webhook`,
-    };
+    const accessToken = process.env.MP_ACCESS_TOKEN;
 
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
-        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
       },
-      body: JSON.stringify(preference),
+      body: JSON.stringify({
+        items: [
+          {
+            title: "Resultado do Teste + 2 eBooks Exclusivos",
+            quantity: 1,
+            currency_id: "BRL",
+            unit_price: 4.99,
+          },
+        ],
+        back_urls: {
+          success: "https://teste-tdah-liard.vercel.app/resultado",
+          failure: "https://teste-tdah-liard.vercel.app/checkout",
+          pending: "https://teste-tdah-liard.vercel.app/checkout",
+        },
+        auto_return: "approved",
+        notification_url: "https://teste-tdah-liard.vercel.app/api/webhook",
+      }),
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Erro ao criar preferência MP:", errText);
-      return NextResponse.json({ error: "Erro ao criar preferência" }, { status: 502 });
-    }
 
     const data = await response.json();
 
-    // Retorna o link de pagamento para o frontend
+    if (!response.ok) {
+      console.error("Erro Mercado Pago:", data);
+      return NextResponse.json({ error: "Erro ao criar preferência" }, { status: 500 });
+    }
+
     return NextResponse.json({ init_point: data.init_point });
   } catch (error) {
-    console.error("Erro create-payment:", error);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    console.error("Erro geral:", error);
+    return NextResponse.json({ error: "Erro ao iniciar pagamento" }, { status: 500 });
   }
 }
