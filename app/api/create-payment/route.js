@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || "https://seudominio.com"; // ajuste para o seu domínio
+const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || "https://teste-tdah-liard.vercel.app"; // ajuste para o seu domínio
 
 export async function POST(req) {
   try {
