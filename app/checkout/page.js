@@ -72,7 +72,7 @@ export default function CheckoutPage() {
               ACESSAR MEU RESULTADO AGORA
             </Link>
             <p className="text-sm text-gray-400 mt-3">
-              (pagamento único, acesso imediato após confirmação)
+              (Pagamento único. Após a confirmação, você será redirecionado automaticamente para ver o seu resultado.)
             </p>
           </motion.div>
         </motion.div>
