@@ -1,20 +1,29 @@
 import { NextResponse } from "next/server";
 
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || "https://seudominio.com"; // ajuste para o seu domínio
+
 export async function POST(req) {
   try {
-    const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-    const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || "https://teste-tdah-liard.vercel.app";
+    const body = await req.json();
+    const { referenceId, title, price } = body;
 
-    if (!MP_ACCESS_TOKEN) {
-      return NextResponse.json({ error: "MP_ACCESS_TOKEN ausente" }, { status: 500 });
+    // Verificações básicas
+    if (!referenceId || !title || !price) {
+      return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const { referenceId = "ref_" + Date.now(), title = "Resultado + eBooks", price = 4.99 } = body;
-
+    // Criação da preferência no Mercado Pago
     const preference = {
-      items: [{ title, quantity: 1, currency_id: "BRL", unit_price: Number(price) }],
-      external_reference: referenceId,
+      items: [
+        {
+          title,
+          quantity: 1,
+          currency_id: "BRL",
+          unit_price: parseFloat(price),
+        },
+      ],
+      external_reference: referenceId, // usado para identificar o pagamento no webhook
       back_urls: {
         success: `${DOMAIN}/resultado?ref=${referenceId}`,
         failure: `${DOMAIN}/checkout`,
@@ -24,29 +33,27 @@ export async function POST(req) {
       notification_url: `${DOMAIN}/api/webhook`,
     };
 
-    const resp = await fetch("https://api.mercadopago.com/checkout/preferences", {
+    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
       },
       body: JSON.stringify(preference),
     });
 
-    const data = await resp.text(); // pego o texto cru para debugar
-    let parsed;
-    try { parsed = JSON.parse(data); } catch (e) { parsed = null; }
-
-    if (!resp.ok) {
-      console.error("MP Preference error:", resp.status, data);
-      // Retorna o corpo de erro direto ao frontend para debugar
-      return NextResponse.json({ error: "MP error", status: resp.status, body: parsed ?? data }, { status: 502 });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Erro ao criar preferência MP:", errText);
+      return NextResponse.json({ error: "Erro ao criar preferência" }, { status: 502 });
     }
 
-    // sucesso
-    return NextResponse.json(parsed);
-  } catch (err) {
-    console.error("create-preference handler error:", err);
-    return NextResponse.json({ error: "internal", message: String(err) }, { status: 500 });
+    const data = await response.json();
+
+    // Retorna o link de pagamento para o frontend
+    return NextResponse.json({ init_point: data.init_point });
+  } catch (error) {
+    console.error("Erro create-payment:", error);
+    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
 }
