@@ -13,12 +13,14 @@ export default function CheckoutPage() {
       // Gera um ID único (exemplo: o id do resultado do usuário)
       const referenceId = crypto.randomUUID();
 
-      const response = await fetch("/api/create-payment", {
+      const response = await fetch("/api/create-preference", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          referenceId,
-          title: "Teste de Atenção e Foco + 2 eBooks",
+          referenceId: "ref_" + Date.now(),
+          title: "Resultado completo + 2 eBooks exclusivos",
           price: 4.99,
         }),
       });
