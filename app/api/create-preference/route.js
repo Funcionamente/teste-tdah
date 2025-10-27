@@ -1,45 +1,42 @@
 import { NextResponse } from "next/server";
-import mercadopago from "mercadopago";
+import { MercadoPagoConfig, Preference } from "mercadopago";
 
-// ⚙️ Configuração do Mercado Pago com sua Access Token
-mercadopago.configure({
-  access_token: process.env.MP_ACCESS_TOKEN, // defina isso no .env.local
-});
-
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const body = await req.json();
+    const body = await request.json();
 
-    // Cria a preferência de pagamento
-    const preference = {
-      items: [
-        {
-          id: body.referenceId,
-          title: body.title || "Produto",
-          quantity: 1,
-          unit_price: Number(body.price) || 4.99,
-          currency_id: "BRL",
-        },
-      ],
-      back_urls: {
-        success: "https://teste-tdah-liard.vercel.app/sucesso",
-        failure: "https://teste-tdah-liard.vercel.app/erro",
-        pending: "https://teste-tdah-liard.vercel.app/pendente",
-      },
-      auto_return: "approved",
-      external_reference: body.referenceId,
-    };
-
-    const result = await mercadopago.preferences.create(preference);
-
-    return NextResponse.json({
-      init_point: result.body.init_point,
+    // Cria cliente Mercado Pago
+    const client = new MercadoPagoConfig({
+      accessToken: process.env.MP_ACCESS_TOKEN, // definido nas variáveis do Vercel
     });
+
+    // Cria uma nova preferência
+    const preference = new Preference(client);
+
+    const result = await preference.create({
+      body: {
+        items: [
+          {
+            title: body.title || "Acesso ao Resultado Completo + 2 eBooks",
+            quantity: 1,
+            currency_id: "BRL",
+            unit_price: body.price || 4.99,
+          },
+        ],
+        back_urls: {
+          success: "https://teste-tdah-liard.vercel.app/resultado",
+          failure: "https://teste-tdah-liard.vercel.app/checkout",
+          pending: "https://teste-tdah-liard.vercel.app/checkout",
+        },
+        auto_return: "approved",
+        external_reference: body.referenceId || "ref_" + Date.now(),
+        notification_url: "https://teste-tdah-liard.vercel.app/api/webhook", // webhook opcional
+      },
+    });
+
+    return NextResponse.json({ init_point: result.init_point });
   } catch (error) {
     console.error("Erro ao criar preferência:", error);
-    return NextResponse.json(
-      { error: "Erro ao criar preferência" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
