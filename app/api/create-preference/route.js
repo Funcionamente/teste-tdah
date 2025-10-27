@@ -4,20 +4,17 @@ export async function POST() {
   try {
     const accessToken = process.env.MP_ACCESS_TOKEN;
 
-    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
+    const response = await fetch("/api/create-preference", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        items: [
-          {
-            title: "Resultado do Teste + 2 eBooks Exclusivos",
-            quantity: 1,
-            currency_id: "BRL",
-            unit_price: 4.99,
-          },
+        referenceId: "ref_" + Date.now(),
+        title: "Resultado completo + 2 eBooks exclusivos",
+        price: 4.99,
+      }),
+    });
         ],
         back_urls: {
           success: "https://teste-tdah-liard.vercel.app/resultado",
