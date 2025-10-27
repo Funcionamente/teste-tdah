@@ -8,7 +8,7 @@ export async function POST(request) {
     console.log("📦 Dados recebidos:", body);
     console.log("🔑 Access token presente?", !!process.env.MP_ACCESS_TOKEN);
 
-    // Inicializa o client Mercado Pago
+    // Inicializa o client do Mercado Pago
     const client = new MercadoPagoConfig({
       accessToken: process.env.MP_ACCESS_TOKEN,
     });
@@ -38,8 +38,11 @@ export async function POST(request) {
     console.log("✅ Preferência criada:", result.id);
     console.log("🔗 Link:", result.init_point);
 
-    // Retorna o JSON com o link direto
-    return NextResponse.json({ init_point: result.init_point });
+    // ⚠️ Retorna somente dados simples
+    return NextResponse.json({
+      init_point: result.init_point,
+      id: result.id,
+    });
 
   } catch (error) {
     console.error("❌ Erro ao criar preferência:", error);
