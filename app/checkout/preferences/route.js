@@ -15,8 +15,8 @@ const preference = await MercadoPago.preferences.create({
     score: pontuacaoDoTeste  // valor que você salvou após o teste
   },
   back_urls: {
-    success: "https://seusite.com/resultado",
-    failure: "https://seusite.com/checkout"
+    success: "https://teste-tdah-liard.vercel.app/resultado",
+    failure: "https://teste-tdah-liard.vercel.app/checkout"
   },
   auto_return: "approved"
 });
