@@ -1,41 +1,45 @@
 import { NextResponse } from "next/server";
+import mercadopago from "mercadopago";
 
-export async function POST() {
+// ⚙️ Configuração do Mercado Pago com sua Access Token
+mercadopago.configure({
+  access_token: process.env.MP_ACCESS_TOKEN, // defina isso no .env.local
+});
+
+export async function POST(req) {
   try {
-    const accessToken = process.env.MP_ACCESS_TOKEN;
+    const body = await req.json();
 
-    const response = await fetch("/api/create-preference", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        referenceId: "ref_" + Date.now(),
-        title: "Resultado completo + 2 eBooks exclusivos",
-        price: 4.99,
-      }),
-    });
-        ],
-        back_urls: {
-          success: "https://teste-tdah-liard.vercel.app/resultado",
-          failure: "https://teste-tdah-liard.vercel.app/checkout",
-          pending: "https://teste-tdah-liard.vercel.app/checkout",
+    // Cria a preferência de pagamento
+    const preference = {
+      items: [
+        {
+          id: body.referenceId,
+          title: body.title || "Produto",
+          quantity: 1,
+          unit_price: Number(body.price) || 4.99,
+          currency_id: "BRL",
         },
-        auto_return: "approved",
-        notification_url: "https://teste-tdah-liard.vercel.app/api/webhook",
-      }),
+      ],
+      back_urls: {
+        success: "https://teste-tdah-liard.vercel.app/sucesso",
+        failure: "https://teste-tdah-liard.vercel.app/erro",
+        pending: "https://teste-tdah-liard.vercel.app/pendente",
+      },
+      auto_return: "approved",
+      external_reference: body.referenceId,
+    };
+
+    const result = await mercadopago.preferences.create(preference);
+
+    return NextResponse.json({
+      init_point: result.body.init_point,
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Erro Mercado Pago:", data);
-      return NextResponse.json({ error: "Erro ao criar preferência" }, { status: 500 });
-    }
-
-    return NextResponse.json({ init_point: data.init_point });
   } catch (error) {
-    console.error("Erro geral:", error);
-    return NextResponse.json({ error: "Erro ao iniciar pagamento" }, { status: 500 });
+    console.error("Erro ao criar preferência:", error);
+    return NextResponse.json(
+      { error: "Erro ao criar preferência" },
+      { status: 500 }
+    );
   }
 }
