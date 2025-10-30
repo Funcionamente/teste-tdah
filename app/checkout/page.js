@@ -7,9 +7,9 @@ export default function CheckoutPage() {
 
   // Função chamada ao clicar no botão
   const handlePayment = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-
+      
       // Gera um ID único (exemplo: o id do resultado do usuário)
       const referenceId = crypto.randomUUID();
 
@@ -27,14 +27,16 @@ export default function CheckoutPage() {
 
       const data = await response.json();
 
-      if (data.init_point) {
-        window.open(data.init_point, "_blank"); // abre checkout do MP
+      if (data?.init_point) {
+        // abre checkout do MP no mesmo contexto (sem popup)
+        // Isso funciona em todos os navegadores, inclusive Safari iOS
+        window.location.assign(data.init_point); 
       } else {
         alert("Erro ao criar o link de pagamento. Tente novamente.");
         console.error("Erro:", data);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao iniciar o pagamento:", err);
       alert("Erro ao iniciar o pagamento.");
     } finally {
       setLoading(false);
