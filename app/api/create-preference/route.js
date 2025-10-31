@@ -1,7 +1,7 @@
-imp​ort { MercadoPagoConfig, Preference } from "mercadopago";
+import { MercadoPagoConfig, Preference } from "mercadopago";
 
 export async function POST(request) {
-  try {
+  try {​
     const body = await request.json();
 
     console.log("📦 Dados recebidos:", body);
