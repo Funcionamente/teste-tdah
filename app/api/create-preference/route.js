@@ -1,4 +1,4 @@
-const M​P_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export async function POST(req) {
