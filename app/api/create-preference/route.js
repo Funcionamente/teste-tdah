@@ -1,5 +1,5 @@
 import { MercadoPagoConfig, Preference } from "mercadopago";
-​
+
 
 export async function POST(request) {
   try {
