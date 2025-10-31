@@ -7,72 +7,72 @@ const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 export async function POST(req) {
   try {
     const body = await req.json();
+    console.log("📩 Webhook recebido:", JSON.stringify(body).slice(0, 400));
 
-    // Tenta extrair o paymentId de diferentes formatos de webhook do Mercado Pago
-    const paymentId = body?.data?.id || body?.id || body?.data?.object?.id;
+    // 🧩 Extrair o ID corretamente
+    let paymentId = body?.data?.id || body?.id;
+
+    // Se vier um link completo (ex: body.resource = "https://api.mercadopago.com/v1/payments/1234")
+    if (!paymentId && body?.resource) {
+      const match = body.resource.match(/\/payments\/(\d+)/);
+      if (match) paymentId = match[1];
+    }
 
     if (!paymentId) {
-      console.warn("⚠️ Webhook sem paymentId. Body parcial:", JSON.stringify(body).slice(0, 300));
+      console.warn("⚠️ Webhook recebido sem paymentId:", body);
       return NextResponse.json({ received: true });
     }
 
-    // Busca detalhes do pagamento no Mercado Pago
+    // ✅ Consultar pagamento no Mercado Pago
     const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
       headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
     });
 
     if (!mpRes.ok) {
-      const errText = await mpRes.text();
-      console.error("❌ Erro ao consultar pagamento no Mercado Pago:", errText);
+      const text = await mpRes.text();
+      console.error("❌ Erro ao consultar pagamento no Mercado Pago:", text);
       return NextResponse.json({ error: "mp fetch error" }, { status: 502 });
     }
 
     const payment = await mpRes.json();
+    console.log("💳 Pagamento consultado:", payment.id, payment.status);
 
-    // Verifica status do pagamento
+    // ✅ Atualizar Supabase se aprovado
     if (payment.status === "approved") {
       const externalRef = payment.external_reference;
 
       if (!externalRef) {
-        console.error("❌ Pagamento aprovado, mas sem external_reference:", payment);
-        return NextResponse.json({ error: "missing external_reference" }, { status: 400 });
-      }
-
-      if (!SUPABASE_URL || !SUPABASE_KEY) {
-        console.error("❌ Variáveis de ambiente ausentes:", { SUPABASE_URL, SUPABASE_KEY: !!SUPABASE_KEY });
-        return NextResponse.json({ error: "missing supabase env vars" }, { status: 500 });
-      }
-
-      const updateUrl = `${SUPABASE_URL}/rest/v1/payments?id=eq.${externalRef}`;
-
-      const updateRes = await fetch(updateUrl, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-        body: JSON.stringify({
-          status: "approved",
-          mp_payment_id: payment.id,
-          approved_at: new Date().toISOString(),
-          metadata: payment,
-        }),
-      });
-
-      if (!updateRes.ok) {
-        const errTxt = await updateRes.text();
-        console.error("❌ Falha ao atualizar Supabase:", errTxt);
+        console.warn("⚠️ Pagamento aprovado sem external_reference:", payment);
       } else {
-        console.log(`✅ Pagamento aprovado e atualizado com sucesso: ${externalRef}`);
+        const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/payments?id=eq.${externalRef}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+          },
+          body: JSON.stringify({
+            status: "approved",
+            mp_payment_id: payment.id,
+            approved_at: new Date().toISOString(),
+            metadata: payment,
+          }),
+        });
+
+        if (!updateRes.ok) {
+          console.error("❌ Falha ao atualizar Supabase:", await updateRes.text());
+        } else {
+          console.log(`✅ Pagamento aprovado e atualizado para ${externalRef}`);
+        }
       }
     } else {
-      console.log(`ℹ️ Pagamento com status '${payment.status}' para ID ${paymentId}`);
+      console.log("ℹ️ Status do pagamento não é 'approved':", payment.status);
     }
 
     return NextResponse.json({ received: true });
+
   } catch (err) {
-    console.error("💥 Webhook handler error:", err);
+    console.error("💥 Erro no Webhook handler:", err);
     return NextResponse.json({ error: "internal" }, { status: 500 });
   }
 }
