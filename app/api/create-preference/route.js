@@ -24,35 +24,41 @@ export async function POST(req) {
       });
     }
 
-    // ✅ Criar a preferência via API do Mercado Pago
+    // ✅ Criação da preferência com todos os campos exigidos pelo MP
+    const preferenceData = {
+      items: [
+        {
+          id: referenceId,
+          title,
+          quantity: 1,
+          currency_id: "BRL",
+          unit_price: Number(price),
+          category_id: "digital_goods", // 🔹 melhora o índice de aprovação
+          description: "Acesso ao resultado completo e eBooks digitais exclusivos", // 🔹 ajuda na validação antifraude
+        },
+      ],
+      external_reference: referenceId, // 🔗 usado no webhook e no Supabase
+      statement_descriptor: "TESTEDIMINDAL", // 🧾 nome na fatura do cliente
+      notification_url: `${BASE_URL}/api/webhook`, // 📡 essencial para o Mercado Pago notificar mudanças
+      back_urls: {
+        success: `${BASE_URL}/resultado?status=success`,
+        failure: `${BASE_URL}/resultado?status=failure`,
+        pending: `${BASE_URL}/resultado?status=pending`,
+      },
+      auto_return: "approved",
+    };
+
     const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
       },
-      body: JSON.stringify({
-        items: [
-          {
-            id: referenceId,
-            title,
-            quantity: 1,
-            currency_id: "BRL",
-            unit_price: Number(price),
-          },
-        ],
-        external_reference: referenceId, // 🔗 usado no webhook para vincular o pagamento
-        back_urls: {
-          success: `${BASE_URL}/resultado?status=success`,
-          failure: `${BASE_URL}/resultado?status=failure`,
-          pending: `${BASE_URL}/resultado?status=pending`,
-        },
-        auto_return: "approved",
-      }),
+      body: JSON.stringify(preferenceData),
     });
 
     const rawText = await mpRes.text();
-    console.log("📥 Resposta bruta MP:", rawText.slice(0, 200)); // mostra só parte do texto
+    console.log("📥 Resposta bruta MP:", rawText.slice(0, 300));
 
     let result;
     try {
@@ -76,7 +82,6 @@ export async function POST(req) {
     console.log("✅ Preferência criada:", result.id);
     console.log("🔗 Link:", result.init_point);
 
-    // ✅ Retornar link como JSON simples
     return new Response(JSON.stringify({ init_point: result.init_point }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
