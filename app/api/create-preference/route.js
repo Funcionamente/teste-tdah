@@ -11,21 +11,19 @@ export async function POST(req) {
     const { referenceId, title, price } = body;
 
     if (!MP_ACCESS_TOKEN) {
-      console.error("❌ Token do Mercado Pago não encontrado");
-      return NextResponse.json({ error: "missing access token" }, { status: 500 });
+      return NextResponse.json({ error: "Faltando token do Mercado Pago" }, { status: 500 });
     }
 
     if (!BASE_URL) {
-      console.error("❌ NEXT_PUBLIC_BASE_URL não definido no .env");
-      return NextResponse.json({ error: "missing base url" }, { status: 500 });
+      return NextResponse.json({ error: "Faltando BASE_URL" }, { status: 500 });
     }
 
-    // 🔗 Criar preferência diretamente pela API REST do Mercado Pago
-    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
+    // ✅ Criar a preferência via API REST do Mercado Pago
+    const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
       },
       body: JSON.stringify({
         items: [
@@ -37,7 +35,7 @@ export async function POST(req) {
             unit_price: Number(price),
           },
         ],
-        external_reference: referenceId, // ✅ campo obrigatório para correlacionar com seu sistema
+        external_reference: referenceId, // 🧩 obrigatório para correlacionar com seu sistema
         back_urls: {
           success: `${BASE_URL}/resultado?status=success`,
           failure: `${BASE_URL}/resultado?status=failure`,
@@ -47,21 +45,28 @@ export async function POST(req) {
       }),
     });
 
-    // ⚠️ Correção do erro "a.json is not a function"
-    const result = await response.json();
+    // ⚙️ Verificar tipo de resposta antes de chamar .json()
+    let resultText = await mpRes.text();
+    let result;
 
-    if (!response.ok) {
+    try {
+      result = JSON.parse(resultText);
+    } catch {
+      console.error("❌ Resposta não é JSON válida:", resultText);
+      return NextResponse.json({ error: "Invalid JSON response", raw: resultText }, { status: 500 });
+    }
+
+    if (!mpRes.ok) {
       console.error("❌ Erro na resposta do Mercado Pago:", result);
-      return NextResponse.json({ error: "mercadopago error", details: result }, { status: 500 });
+      return NextResponse.json({ error: "MercadoPago Error", details: result }, { status: 500 });
     }
 
     console.log("✅ Preferência criada:", result.id);
     console.log("🔗 Link:", result.init_point);
 
     return NextResponse.json({ init_point: result.init_point });
-
   } catch (error) {
-    console.error("❌ Erro ao criar preferência:", error);
-    return NextResponse.json({ error: error.message || "internal server error" }, { status: 500 });
+    console.error("💥 Erro ao criar preferência:", error);
+    return NextResponse.json({ error: error.message || "Erro interno" }, { status: 500 });
   }
 }
