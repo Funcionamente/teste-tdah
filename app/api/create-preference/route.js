@@ -1,4 +1,4 @@
-import { MercadoPagoConfig, Preference } from "mercadopago";
+imp​ort { MercadoPagoConfig, Preference } from "mercadopago";
 
 export async function POST(request) {
   try {
@@ -13,6 +13,9 @@ export async function POST(request) {
 
     const preference = new Preference(client);
 
+    // Cria um ID de referência único (session_id)
+    const sessionId = body.referenceId || "sess_" + Date.now();
+
     const result = await preference.create({
       body: {
         items: [
@@ -24,11 +27,12 @@ export async function POST(request) {
           },
         ],
         back_urls: {
-          success: "https://teste-tdah-liard.vercel.app/resultado",
-          failure: "https://teste-tdah-liard.vercel.app/checkout",
-          pending: "https://teste-tdah-liard.vercel.app/checkout",
+          success: `https://teste-tdah-liard.vercel.app/resultado?session_id=${sessionId}&status=success`,
+          failure: `https://teste-tdah-liard.vercel.app/resultado?session_id=${sessionId}&status=failure`,
+          pending: `https://teste-tdah-liard.vercel.app/resultado?session_id=${sessionId}&status=pending`,
         },
-        auto_return: "approved",
+        auto_return: "approved", // redireciona automaticamente após o pagamento
+        external_reference: sessionId,
       },
     });
 
@@ -40,6 +44,7 @@ export async function POST(request) {
       JSON.stringify({
         init_point: result.init_point,
         id: result.id,
+        session_id: sessionId,
       }),
       {
         status: 200,
