@@ -1,4 +1,4 @@
-​import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
