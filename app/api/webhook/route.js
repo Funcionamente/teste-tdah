@@ -8,33 +8,44 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    // Mercado Pago costuma enviar o payment id em body.data.id (ou body.data?.id)
-    // ou em different shapes depending on the event. Try a few places:
+    // Tenta extrair o paymentId de diferentes formatos de webhook do Mercado Pago
     const paymentId = body?.data?.id || body?.id || body?.data?.object?.id;
 
     if (!paymentId) {
-      // nothing to do
-      console.log("Webhook received without payment id, body:", JSON.stringify(body).slice(0,200));
+      console.warn("⚠️ Webhook sem paymentId. Body parcial:", JSON.stringify(body).slice(0, 300));
       return NextResponse.json({ received: true });
     }
 
-    // Confirmar pagamento consultando a API do Mercado Pago
+    // Busca detalhes do pagamento no Mercado Pago
     const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` }
+      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
     });
 
     if (!mpRes.ok) {
-      console.error("Erro ao buscar payment MP:", await mpRes.text());
+      const errText = await mpRes.text();
+      console.error("❌ Erro ao consultar pagamento no Mercado Pago:", errText);
       return NextResponse.json({ error: "mp fetch error" }, { status: 502 });
     }
 
     const payment = await mpRes.json();
 
-    // Verifique status
+    // Verifica status do pagamento
     if (payment.status === "approved") {
-      const externalRef = payment.external_reference; // esse é o referenceId que criamos
-      // Atualizar registro no Supabase
-      const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/payments?id=eq.${externalRef}`, {
+      const externalRef = payment.external_reference;
+
+      if (!externalRef) {
+        console.error("❌ Pagamento aprovado, mas sem external_reference:", payment);
+        return NextResponse.json({ error: "missing external_reference" }, { status: 400 });
+      }
+
+      if (!SUPABASE_URL || !SUPABASE_KEY) {
+        console.error("❌ Variáveis de ambiente ausentes:", { SUPABASE_URL, SUPABASE_KEY: !!SUPABASE_KEY });
+        return NextResponse.json({ error: "missing supabase env vars" }, { status: 500 });
+      }
+
+      const updateUrl = `${SUPABASE_URL}/rest/v1/payments?id=eq.${externalRef}`;
+
+      const updateRes = await fetch(updateUrl, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -45,23 +56,23 @@ export async function POST(req) {
           status: "approved",
           mp_payment_id: payment.id,
           approved_at: new Date().toISOString(),
-          metadata: payment
-        })
+          metadata: payment,
+        }),
       });
 
       if (!updateRes.ok) {
-        console.error("Supabase update failed:", await updateRes.text());
+        const errTxt = await updateRes.text();
+        console.error("❌ Falha ao atualizar Supabase:", errTxt);
       } else {
-        console.log(`Payment approved and record updated for ${externalRef}`);
+        console.log(`✅ Pagamento aprovado e atualizado com sucesso: ${externalRef}`);
       }
     } else {
-      console.log("Payment status not approved:", payment.status);
-      // opcional: atualizar como 'failed' ou 'pending'
+      console.log(`ℹ️ Pagamento com status '${payment.status}' para ID ${paymentId}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (err) {
-    console.error("Webhook handler error:", err);
+    console.error("💥 Webhook handler error:", err);
     return NextResponse.json({ error: "internal" }, { status: 500 });
   }
 }
