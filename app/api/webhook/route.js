@@ -27,13 +27,26 @@ export async function POST(req) {
       headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
     });
 
+    // 🛑 Verifica se houve erro na requisição antes de tentar mpRes.json()
     if (!mpRes.ok) {
       const text = await mpRes.text();
       console.error("❌ Erro ao consultar pagamento no Mercado Pago:", text);
-      return NextResponse.json({ error: "mp fetch error" }, { status: 502 });
+      return NextResponse.json(
+        { error: "Erro ao consultar pagamento no Mercado Pago", details: text },
+        { status: mpRes.status }
+      );
     }
 
-    const payment = await mpRes.json();
+    // 🧩 Garante que a resposta é JSON antes de tentar parsear
+    let payment;
+    try {
+      payment = await mpRes.json();
+    } catch (parseErr) {
+      const text = await mpRes.text();
+      console.error("⚠️ Falha ao converter resposta em JSON:", text);
+      return NextResponse.json({ error: "Resposta inválida do Mercado Pago" }, { status: 502 });
+    }
+
     console.log("💳 Pagamento consultado:", payment.id, payment.status);
 
     // ✅ Atualizar Supabase se o pagamento foi aprovado
@@ -68,6 +81,7 @@ export async function POST(req) {
       console.log("ℹ️ Status do pagamento não é 'approved':", payment.status);
     }
 
+    // ✅ Sempre responder 200 ao Mercado Pago, mesmo que só logue o evento
     return NextResponse.json({ received: true });
   } catch (err) {
     console.error("💥 Erro no Webhook handler:", err);
