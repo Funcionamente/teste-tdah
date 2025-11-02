@@ -9,6 +9,12 @@ export async function POST(req) {
     const body = await req.json();
     console.log("📩 Webhook recebido:", JSON.stringify(body).slice(0, 400));
 
+    // 🧠 Filtra tipos de evento que não são "payment"
+    if (body.type !== "payment") {
+      console.log(`ℹ️ Evento ignorado (${body.type})`);
+      return NextResponse.json({ ignored: true });
+    }
+
     let paymentId = body?.data?.id || body?.id;
 
     // 🧠 Corrige caso venha um link completo no campo "resource"
@@ -27,7 +33,6 @@ export async function POST(req) {
       headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
     });
 
-    // 🛑 Verifica se houve erro na requisição antes de tentar mpRes.json()
     if (!mpRes.ok) {
       const text = await mpRes.text();
       console.error("❌ Erro ao consultar pagamento no Mercado Pago:", text);
@@ -37,13 +42,11 @@ export async function POST(req) {
       );
     }
 
-    // 🧩 Garante que a resposta é JSON antes de tentar parsear
     let payment;
     try {
       payment = await mpRes.json();
-    } catch (parseErr) {
-      const text = await mpRes.text();
-      console.error("⚠️ Falha ao converter resposta em JSON:", text);
+    } catch (err) {
+      console.error("⚠️ Resposta inválida do Mercado Pago");
       return NextResponse.json({ error: "Resposta inválida do Mercado Pago" }, { status: 502 });
     }
 
@@ -81,7 +84,7 @@ export async function POST(req) {
       console.log("ℹ️ Status do pagamento não é 'approved':", payment.status);
     }
 
-    // ✅ Sempre responder 200 ao Mercado Pago, mesmo que só logue o evento
+    // ✅ Sempre responder 200 OK
     return NextResponse.json({ received: true });
   } catch (err) {
     console.error("💥 Erro no Webhook handler:", err);
