@@ -172,7 +172,7 @@ export default function Resultado() {
             <div
               className="absolute top-1/2 -translate-y-1/2"
               style={{
-                left: `${(pontuacao! / total) * 100}%`,
+                left: `${(pontuacao / total) * 100}%`,
                 transform: "translate(-50%, -50%)",
               }}
             >
