@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function Resultado() {
   const [loading, setLoading] = useState(true);
-  const [pontuacao, setPontuacao] = useState<number | null>(null);
+  const [pontuacao, setPontuacao] = useState<Number | null>(null);
   const [faixa, setFaixa] = useState("");
   const [descricao, setDescricao] = useState("");
   const [proximoPasso, setProximoPasso] = useState("");
