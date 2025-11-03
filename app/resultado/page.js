@@ -8,50 +8,64 @@ import Link from "next/link";
 
 export default function Resultado() {
   const [loading, setLoading] = useState(true);
-  const [pontuacao, setPontuacao] = useState(null);
+  const [pontuacao, setPontuacao] = useState<number | null>(null);
   const [faixa, setFaixa] = useState("");
   const [descricao, setDescricao] = useState("");
   const [proximoPasso, setProximoPasso] = useState("");
-  const [erro, setErro] = useState(null);
+  const [erro, setErro] = useState<string | null>(null);
 
   const total = 150;
-  // já está importado, então pode remover essa linha completamente
 
   useEffect(() => {
     async function fetchResultado() {
       try {
         const params = new URLSearchParams(window.location.search);
-        const sessionId = params.get("session_id");
+        const ref = params.get("external_reference"); // 🔹 obtém o código enviado ao MP
 
-        if (!sessionId) {
+        if (!ref) {
           setErro("Sessão inválida. Tente novamente.");
           setLoading(false);
           return;
         }
 
-        // 1️⃣ Buscar pagamento confirmado
+        // 1️⃣ Buscar pagamento confirmado usando o external_reference
         const { data: pagamento, error: pagamentoError } = await supabase
           .from("payments")
-          .select("email")
-          .eq("session_id", sessionId)
+          .select("mp_payment_id, status, metadata")
+          .eq("id", ref) // agora a referência é o id interno do sistema (UUID/texto)
           .single();
 
         if (pagamentoError || !pagamento) {
+          console.error(pagamentoError);
           setErro("Pagamento não encontrado ou inválido.");
           setLoading(false);
           return;
         }
 
-        // 2️⃣ Buscar resultado do teste pelo email do pagamento
+        if (pagamento.status !== "approved") {
+          setErro("Pagamento ainda não foi aprovado.");
+          setLoading(false);
+          return;
+        }
+
+        const email = pagamento.metadata?.email;
+        if (!email) {
+          setErro("Não foi possível identificar o e-mail do teste.");
+          setLoading(false);
+          return;
+        }
+
+        // 2️⃣ Buscar resultado do teste pelo e-mail associado
         const { data: resultado, error: resultadoError } = await supabase
           .from("resultados_teste")
           .select("*")
-          .eq("email", pagamento.email)
-          .order("id", { ascending: false })
+          .eq("email", email)
+          .order("criado_em", { ascending: false })
           .limit(1)
           .single();
 
         if (resultadoError || !resultado) {
+          console.error(resultadoError);
           setErro("Resultado do teste não encontrado.");
           setLoading(false);
           return;
@@ -59,6 +73,7 @@ export default function Resultado() {
 
         // 3️⃣ Calcular faixa e descrições
         setPontuacao(resultado.pontuacao);
+
         if (resultado.pontuacao <= 50) {
           setFaixa("Baixa probabilidade");
           setDescricao(
@@ -92,6 +107,7 @@ export default function Resultado() {
     fetchResultado();
   }, []);
 
+  // 🌀 LOADING
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
@@ -101,6 +117,7 @@ export default function Resultado() {
     );
   }
 
+  // ⚠️ ERRO
   if (erro) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
@@ -112,6 +129,7 @@ export default function Resultado() {
     );
   }
 
+  // ✅ RESULTADO
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center px-4 py-10">
       <motion.div
@@ -125,19 +143,17 @@ export default function Resultado() {
           Resultado do seu Teste de Atenção e Foco (base OMS)
         </h1>
 
-        {/* Pontuação principal */}
         <div className="bg-gradient-to-br from-[#ffb347] to-[#ffcc70] text-black font-bold rounded-full w-28 h-28 mx-auto flex items-center justify-center text-xl mb-4 shadow-xl">
           {pontuacao}/{total}
         </div>
         <h2 className="font-semibold text-[#ffb347] mb-2">FAIXA: {faixa}</h2>
         <p className="text-gray-300 mb-6">{descricao}</p>
 
-        {/* Próximo passo */}
         <div className="bg-[#ffb347]/20 border border-[#ffb347] p-4 rounded-lg text-[#ffb347] font-semibold mb-6">
           <p>{proximoPasso}</p>
         </div>
 
-        {/* Barra de Faixas */}
+        {/* Barra de faixas */}
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: "100%" }}
@@ -156,7 +172,7 @@ export default function Resultado() {
             <div
               className="absolute top-1/2 -translate-y-1/2"
               style={{
-                left: `${(pontuacao / total) * 100}%`,
+                left: `${(pontuacao! / total) * 100}%`,
                 transform: "translate(-50%, -50%)",
               }}
             >
@@ -168,21 +184,18 @@ export default function Resultado() {
 
           <ul className="text-sm text-gray-300 space-y-2 mt-3">
             <li>
-              <span className="text-[#1db954] font-semibold">0 a 50:</span>{" "}
-              Baixa probabilidade — indica baixa tendência a sintomas de TDAH.
+              <span className="text-[#1db954] font-semibold">0 a 50:</span> Baixa probabilidade — indica baixa tendência a sintomas de TDAH.
             </li>
             <li>
-              <span className="text-[#ffb347] font-semibold">51 a 100:</span>{" "}
-              Indícios moderados — alguns sinais podem estar presentes.
+              <span className="text-[#ffb347] font-semibold">51 a 100:</span> Indícios moderados — alguns sinais podem estar presentes.
             </li>
             <li>
-              <span className="text-[#ff4c4c] font-semibold">101 a 150:</span>{" "}
-              Alta probabilidade — indica sinais significativos de TDAH.
+              <span className="text-[#ff4c4c] font-semibold">101 a 150:</span> Alta probabilidade — indica sinais significativos de TDAH.
             </li>
           </ul>
         </motion.div>
 
-        {/* Seção de E-books */}
+        {/* E-books */}
         <motion.div
           className="mt-12 p-6 bg-gray-50 rounded-2xl shadow-md text-center"
           initial={{ opacity: 0, y: 20 }}
@@ -195,7 +208,7 @@ export default function Resultado() {
           <p className="text-gray-600 mb-6">
             Clique abaixo para baixar gratuitamente seus materiais de apoio:
           </p>
-        
+
           <div className="flex flex-col md:flex-row justify-center gap-4">
             <a
               href="/ebooks/Explicando-o-TDAH.pdf"
@@ -204,7 +217,7 @@ export default function Resultado() {
             >
               📘 Baixar E-book – Explicando o TDAH
             </a>
-        
+
             <a
               href="/ebooks/Como-o-TDAH-Afeta-Relacionamentos.pdf"
               download
@@ -215,7 +228,7 @@ export default function Resultado() {
           </div>
         </motion.div>
 
-        {/* Faixa final de destaque */}
+        {/* Rodapé */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -223,9 +236,8 @@ export default function Resultado() {
           className="mt-10 bg-gradient-to-r from-[#ffb347] to-[#ffcc70] text-black font-semibold p-6 rounded-xl shadow-lg"
         >
           <p>
-            Lembre-se: este teste é apenas uma triagem inicial baseada em critérios
-            da OMS. Somente um profissional qualificado pode oferecer um diagnóstico
-            preciso.
+            Lembre-se: este teste é apenas uma triagem inicial baseada em critérios da OMS. 
+            Somente um profissional qualificado pode oferecer um diagnóstico preciso.
           </p>
           <Link
             href="/"
