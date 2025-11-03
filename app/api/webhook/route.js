@@ -22,23 +22,17 @@ export async function POST(req) {
     const eventType = body.type || body.topic || body.action || "";
     const normalized = String(eventType).toLowerCase();
 
-    // Ignora merchant_order e topic_merchant_order_wh
-    if (
-      normalized.includes("merchant_order") ||
-      normalized === "topic_merchant_order_wh"
-    ) {
-      log("ℹ️ Evento de merchant_order ignorado (apenas log). type=", eventType);
+    if (normalized.includes("merchant_order") || normalized === "topic_merchant_order_wh") {
+      log("ℹ️ Evento de merchant_order ignorado. type=", eventType);
       return new Response("ok", { status: 200 });
     }
 
-    // Trata apenas pagamentos
     if (!normalized.includes("payment")) {
       log("ℹ️ Evento não relacionado a pagamento:", eventType);
       return new Response("ok", { status: 200 });
     }
 
-    // Extrair paymentId
-    let paymentId =
+    const paymentId =
       body?.data?.id ||
       body?.id ||
       (body?.resource?.match(/\/payments\/(\d+)/)?.[1] ?? null);
@@ -48,13 +42,10 @@ export async function POST(req) {
       return new Response("no payment id", { status: 200 });
     }
 
-    // Consultar pagamento no Mercado Pago
-    const paymentRes = await fetch(
-      `https://api.mercadopago.com/v1/payments/${paymentId}`,
-      {
-        headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-      }
-    );
+    // Consulta o pagamento na API do Mercado Pago
+    const paymentRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+    });
 
     if (!paymentRes.ok) {
       const msg = await paymentRes.text().catch(() => "(erro ao ler corpo)");
@@ -72,11 +63,9 @@ export async function POST(req) {
         return new Response("ok", { status: 200 });
       }
 
-      // Atualizar Supabase
-      const supaRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/payments?id=eq.${encodeURIComponent(
-          externalRef
-        )}`,
+      // Atualiza a tabela PAYMENTS
+      const supaPayment = await fetch(
+        `${SUPABASE_URL}/rest/v1/payments?id=eq.${encodeURIComponent(externalRef)}`,
         {
           method: "PATCH",
           headers: {
@@ -94,18 +83,40 @@ export async function POST(req) {
         }
       );
 
-      if (!supaRes.ok) {
-        const txt = await supaRes.text().catch(() => "(sem corpo)");
-        error("❌ Falha ao atualizar Supabase:", txt);
+      if (!supaPayment.ok) {
+        const txt = await supaPayment.text().catch(() => "(sem corpo)");
+        error("❌ Falha ao atualizar tabela payments:", txt);
       } else {
-        log("✅ Supabase atualizado com sucesso para:", externalRef);
+        log("✅ Tabela payments atualizada com sucesso:", externalRef);
+      }
+
+      // Atualiza também a tabela RESULTADOS_TESTE (status_pagamento)
+      const supaResult = await fetch(
+        `${SUPABASE_URL}/rest/v1/resultados_teste?id_pagamento=eq.${encodeURIComponent(externalRef)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+          },
+          body: JSON.stringify({
+            status_pagamento: "approved",
+          }),
+        }
+      );
+
+      if (!supaResult.ok) {
+        const txt = await supaResult.text().catch(() => "(sem corpo)");
+        error("⚠️ Falha ao atualizar tabela resultados_teste:", txt);
+      } else {
+        log("✅ Tabela resultados_teste atualizada para approved:", externalRef);
       }
     }
 
     return new Response("ok", { status: 200 });
   } catch (err) {
     error("💥 Erro no Webhook handler:", err);
-    // Importante: retornar 200 mesmo em falha para não gerar retries
     return new Response("ok", { status: 200 });
   }
 }
