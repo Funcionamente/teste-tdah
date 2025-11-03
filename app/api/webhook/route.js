@@ -19,19 +19,6 @@ export async function POST(req) {
 
     log("📩 Webhook recebido:", JSON.stringify(body).slice(0, 800));
 
-    const eventType = body.type || body.topic || body.action || "";
-    const normalized = String(eventType).toLowerCase();
-
-    if (normalized.includes("merchant_order") || normalized === "topic_merchant_order_wh") {
-      log("ℹ️ Evento de merchant_order ignorado. type=", eventType);
-      return new Response("ok", { status: 200 });
-    }
-
-    if (!normalized.includes("payment")) {
-      log("ℹ️ Evento não relacionado a pagamento:", eventType);
-      return new Response("ok", { status: 200 });
-    }
-
     const paymentId =
       body?.data?.id ||
       body?.id ||
@@ -42,7 +29,7 @@ export async function POST(req) {
       return new Response("no payment id", { status: 200 });
     }
 
-    // Consulta o pagamento na API do Mercado Pago
+    // 🔎 Consulta o pagamento na API do Mercado Pago
     const paymentRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
       headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
     });
@@ -56,62 +43,60 @@ export async function POST(req) {
     const payment = await paymentRes.json();
     log("💳 Pagamento recebido:", payment.id, payment.status);
 
-    if (payment.status === "approved") {
-      const externalRef = payment.external_reference;
-      if (!externalRef) {
-        error("⚠️ Pagamento sem external_reference:", payment.id);
-        return new Response("ok", { status: 200 });
-      }
+    const externalRef = payment.external_reference;
+    if (!externalRef) {
+      error("⚠️ Pagamento sem external_reference:", payment.id);
+      return new Response("ok", { status: 200 });
+    }
 
-      // Atualiza a tabela PAYMENTS
-      const supaPayment = await fetch(
-        `${SUPABASE_URL}/rest/v1/payments?id=eq.${encodeURIComponent(externalRef)}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-            Prefer: "return=representation",
-          },
-          body: JSON.stringify({
-            status: "approved",
-            mp_payment_id: payment.id,
-            approved_at: new Date().toISOString(),
-            metadata: payment,
-          }),
-        }
-      );
+    // 🗂️ Monta os dados para salvar no Supabase
+    const paymentData = {
+      id: externalRef,
+      status: payment.status,
+      mp_payment_id: payment.id,
+      metadata: payment,
+      approved_at: payment.status === "approved" ? new Date().toISOString() : null,
+    };
 
-      if (!supaPayment.ok) {
-        const txt = await supaPayment.text().catch(() => "(sem corpo)");
-        error("❌ Falha ao atualizar tabela payments:", txt);
-      } else {
-        log("✅ Tabela payments atualizada com sucesso:", externalRef);
-      }
+    // ✅ UPSERT na tabela payments
+    const supaPayment = await fetch(`${SUPABASE_URL}/rest/v1/payments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify(paymentData),
+    });
 
-      // Atualiza também a tabela RESULTADOS_TESTE (status_pagamento)
-      const supaResult = await fetch(
-        `${SUPABASE_URL}/rest/v1/resultados_teste?id_pagamento=eq.${encodeURIComponent(externalRef)}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-          },
-          body: JSON.stringify({
-            status_pagamento: "approved",
-          }),
-        }
-      );
+    if (!supaPayment.ok) {
+      const txt = await supaPayment.text().catch(() => "(sem corpo)");
+      error("❌ Falha ao inserir/atualizar tabela payments:", txt);
+    } else {
+      log("✅ Tabela payments atualizada com sucesso:", externalRef);
+    }
 
-      if (!supaResult.ok) {
-        const txt = await supaResult.text().catch(() => "(sem corpo)");
-        error("⚠️ Falha ao atualizar tabela resultados_teste:", txt);
-      } else {
-        log("✅ Tabela resultados_teste atualizada para approved:", externalRef);
-      }
+    // ✅ UPSERT na tabela resultados_teste
+    const supaResult = await fetch(`${SUPABASE_URL}/rest/v1/resultados_teste`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify({
+        id_pagamento: externalRef,
+        status_pagamento: payment.status,
+      }),
+    });
+
+    if (!supaResult.ok) {
+      const txt = await supaResult.text().catch(() => "(sem corpo)");
+      error("⚠️ Falha ao inserir/atualizar tabela resultados_teste:", txt);
+    } else {
+      log("✅ Tabela resultados_teste atualizada para:", payment.status);
     }
 
     return new Response("ok", { status: 200 });
