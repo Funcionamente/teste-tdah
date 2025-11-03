@@ -24,7 +24,7 @@ export async function POST(req) {
       });
     }
 
-    // ✅ Criação da preferência com todos os campos exigidos pelo MP
+    // ✅ Criação da preferência com redirecionamento completo
     const preferenceData = {
       items: [
         {
@@ -33,19 +33,19 @@ export async function POST(req) {
           quantity: 1,
           currency_id: "BRL",
           unit_price: Number(price),
-          category_id: "digital_goods", // 🔹 melhora o índice de aprovação
-          description: "Acesso ao resultado completo e eBooks digitais exclusivos", // 🔹 ajuda na validação antifraude
+          category_id: "digital_goods",
+          description: "Acesso ao resultado completo e eBooks digitais exclusivos",
         },
       ],
-      external_reference: referenceId, // 🔗 usado no webhook e no Supabase
-      statement_descriptor: "TESTEDIMINDAL", // 🧾 nome na fatura do cliente
-      notification_url: `${BASE_URL}/api/webhook`, // 📡 essencial para o Mercado Pago notificar mudanças
+      external_reference: referenceId, // 🔗 código único do teste
+      statement_descriptor: "TESTEDIMINDAL",
+      notification_url: `${BASE_URL}/api/webhook`, // 📡 recebe a notificação MP
       back_urls: {
-        success: `${BASE_URL}/resultado?status=success`,
-        failure: `${BASE_URL}/resultado?status=failure`,
-        pending: `${BASE_URL}/resultado?status=pending`,
+        success: `${BASE_URL}/resultado?external_reference=${referenceId}&status=success`,
+        failure: `${BASE_URL}/resultado?external_reference=${referenceId}&status=failure`,
+        pending: `${BASE_URL}/resultado?external_reference=${referenceId}&status=pending`,
       },
-      auto_return: "approved",
+      auto_return: "approved", // 🔁 redireciona automaticamente após aprovação
     };
 
     const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
@@ -80,7 +80,7 @@ export async function POST(req) {
     }
 
     console.log("✅ Preferência criada:", result.id);
-    console.log("🔗 Link:", result.init_point);
+    console.log("🔗 Link de pagamento:", result.init_point);
 
     return new Response(JSON.stringify({ init_point: result.init_point }), {
       status: 200,
