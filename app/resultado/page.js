@@ -8,11 +8,11 @@ import Link from "next/link";
 
 export default function Resultado() {
   const [loading, setLoading] = useState(true);
-  const [pontuacao, setPontuacao] = useState<Number | null>(null);
+  const [pontuacao, setPontuacao] = useState(null);
   const [faixa, setFaixa] = useState("");
   const [descricao, setDescricao] = useState("");
   const [proximoPasso, setProximoPasso] = useState("");
-  const [erro, setErro] = useState<string | null>(null);
+  const [erro, setErro] = useState(null);
 
   const total = 150;
 
@@ -20,7 +20,7 @@ export default function Resultado() {
     async function fetchResultado() {
       try {
         const params = new URLSearchParams(window.location.search);
-        const ref = params.get("external_reference"); // 🔹 obtém o código enviado ao MP
+        const ref = params.get("external_reference");
 
         if (!ref) {
           setErro("Sessão inválida. Tente novamente.");
@@ -28,11 +28,11 @@ export default function Resultado() {
           return;
         }
 
-        // 1️⃣ Buscar pagamento confirmado usando o external_reference
+        // 🔹 Buscar pagamento confirmado
         const { data: pagamento, error: pagamentoError } = await supabase
           .from("payments")
           .select("mp_payment_id, status, metadata")
-          .eq("id", ref) // agora a referência é o id interno do sistema (UUID/texto)
+          .eq("id", ref)
           .single();
 
         if (pagamentoError || !pagamento) {
@@ -55,7 +55,7 @@ export default function Resultado() {
           return;
         }
 
-        // 2️⃣ Buscar resultado do teste pelo e-mail associado
+        // 🔹 Buscar resultado do teste pelo e-mail
         const { data: resultado, error: resultadoError } = await supabase
           .from("resultados_teste")
           .select("*")
@@ -71,16 +71,17 @@ export default function Resultado() {
           return;
         }
 
-        // 3️⃣ Calcular faixa e descrições
-        setPontuacao(resultado.pontuacao);
+        // 🔹 Calcular faixa e descrições
+        const score = Number(resultado.pontuacao) || 0;
+        setPontuacao(score);
 
-        if (resultado.pontuacao <= 50) {
+        if (score <= 50) {
           setFaixa("Baixa probabilidade");
           setDescricao(
             "Seus resultados indicam baixa tendência a sintomas de TDAH. Continue mantendo hábitos saudáveis e boas rotinas."
           );
           setProximoPasso("Mantenha suas práticas e busque equilíbrio em sua rotina.");
-        } else if (resultado.pontuacao <= 100) {
+        } else if (score <= 100) {
           setFaixa("Indícios Moderados");
           setDescricao(
             "Você possui traços moderados de TDAH. Alguns sintomas podem afetar sua concentração em determinadas situações."
@@ -130,6 +131,11 @@ export default function Resultado() {
   }
 
   // ✅ RESULTADO
+  const posicao =
+    total > 0 && pontuacao !== null
+      ? `${Math.min((pontuacao / total) * 100, 100)}%`
+      : "0%";
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center px-4 py-10">
       <motion.div
@@ -172,7 +178,7 @@ export default function Resultado() {
             <div
               className="absolute top-1/2 -translate-y-1/2"
               style={{
-                left: `${((pontuacao ?? 0) / total) * 100}%`,
+                left: posicao,
                 transform: "translate(-50%, -50%)",
               }}
             >
