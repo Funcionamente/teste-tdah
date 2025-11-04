@@ -42,9 +42,9 @@ export async function POST(req) {
       statement_descriptor: "TESTETDAH",
       notification_url: `${BASE_URL}/api/webhook`, // 📡 notificação assíncrona MP → backend
       back_urls: {
-        success: `${BASE_URL}/resultado?ref=${referenceId}`,
-        failure: `${BASE_URL}/resultado?ref=${referenceId}&status=failure`,
-        pending: `${BASE_URL}/resultado?ref=${referenceId}&status=pending`,
+        success: `${BASE_URL}/resultado?external_reference=${referenceId}&status=success`,
+        failure: `${BASE_URL}/resultado?external_reference=${referenceId}&status=failure`,
+        pending: `${BASE_URL}/resultado?external_reference=${referenceId}&status=pending`,
       },
       auto_return: "approved", // 🔁 redireciona automaticamente após pagamento aprovado
     };
