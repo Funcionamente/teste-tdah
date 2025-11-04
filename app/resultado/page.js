@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function ResultadoIntermediario() {
+function ResultadoContent() {
   const [status, setStatus] = useState("loading");
   const [mensagem, setMensagem] = useState("Verificando status do pagamento...");
   const router = useRouter();
@@ -13,10 +13,10 @@ export default function ResultadoIntermediario() {
   useEffect(() => {
     async function verificarPagamento() {
       try {
-        // ✅ Agora pegamos o parâmetro correto (external_reference)
+        // ✅ Pega o parâmetro correto (external_reference)
         const ref =
           searchParams.get("external_reference") ||
-          searchParams.get("ref"); // fallback, caso venha como ref
+          searchParams.get("ref"); // fallback
         const statusMP = searchParams.get("status");
 
         if (!ref) {
@@ -27,7 +27,7 @@ export default function ResultadoIntermediario() {
 
         console.log("🔍 Verificando pagamento ref:", ref);
 
-        // Consulta o status do pagamento na Supabase
+        // 🔎 Consulta o status do pagamento na Supabase
         const { data: pagamento, error } = await supabase
           .from("payments")
           .select("status")
@@ -65,7 +65,7 @@ export default function ResultadoIntermediario() {
 
     verificarPagamento();
 
-    // 🔁 Recheca a cada 8 segundos (MP pode demorar um pouco)
+    // 🔁 Revalida a cada 8s (Mercado Pago pode demorar)
     const intervalo = setInterval(() => verificarPagamento(), 8000);
     return () => clearInterval(intervalo);
   }, [router, searchParams]);
@@ -104,5 +104,14 @@ export default function ResultadoIntermediario() {
         <p className="text-green-400 text-lg">{mensagem}</p>
       )}
     </div>
+  );
+}
+
+export default function ResultadoIntermediario() {
+  // ✅ Corrige o erro de build envolvendo o hook dentro de um Suspense
+  return (
+    <Suspense fallback={<div className="text-white p-8 text-center">Carregando...</div>}>
+      <ResultadoContent />
+    </Suspense>
   );
 }
