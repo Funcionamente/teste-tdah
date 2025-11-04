@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function ResultadoIntermediario() {
   const [status, setStatus] = useState("loading");
   const [mensagem, setMensagem] = useState("Verificando status do pagamento...");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     async function verificarPagamento() {
       try {
-        const params = new URLSearchParams(window.location.search);
-        const ref = params.get("ref");
+        // ✅ Agora pegamos o parâmetro correto (external_reference)
+        const ref =
+          searchParams.get("external_reference") ||
+          searchParams.get("ref"); // fallback, caso venha como ref
+        const statusMP = searchParams.get("status");
 
         if (!ref) {
           setStatus("erro");
@@ -40,13 +44,14 @@ export default function ResultadoIntermediario() {
         console.log("📊 Status do pagamento:", pagamento.status);
 
         if (pagamento.status === "approved") {
-          setMensagem("Pagamento aprovado! Redirecionando para o resultado...");
+          setMensagem("✅ Pagamento aprovado! Redirecionando para o resultado...");
+          setStatus("aprovado");
           setTimeout(() => {
             router.push(`/resultado-final?ref=${ref}`);
           }, 1500);
-        } else if (pagamento.status === "pending") {
+        } else if (pagamento.status === "pending" || statusMP === "pending") {
           setStatus("pendente");
-          setMensagem("Pagamento ainda pendente. Aguarde a confirmação.");
+          setMensagem("⏳ Pagamento ainda pendente. Aguarde a confirmação.");
         } else {
           setStatus("erro");
           setMensagem("Pagamento não aprovado ou cancelado.");
@@ -60,10 +65,10 @@ export default function ResultadoIntermediario() {
 
     verificarPagamento();
 
-    // Tentativas adicionais para o caso do MP demorar a aprovar
+    // 🔁 Recheca a cada 8 segundos (MP pode demorar um pouco)
     const intervalo = setInterval(() => verificarPagamento(), 8000);
     return () => clearInterval(intervalo);
-  }, [router]);
+  }, [router, searchParams]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white text-center p-6">
@@ -76,8 +81,10 @@ export default function ResultadoIntermediario() {
 
       {status === "pendente" && (
         <>
-          <p className="text-yellow-400 text-lg mb-2">⏳ {mensagem}</p>
-          <p className="text-gray-400 text-sm">Essa página vai atualizar automaticamente.</p>
+          <p className="text-yellow-400 text-lg mb-2">{mensagem}</p>
+          <p className="text-gray-400 text-sm">
+            Essa página vai atualizar automaticamente.
+          </p>
         </>
       )}
 
@@ -91,6 +98,10 @@ export default function ResultadoIntermediario() {
             Voltar ao Início
           </a>
         </>
+      )}
+
+      {status === "aprovado" && (
+        <p className="text-green-400 text-lg">{mensagem}</p>
       )}
     </div>
   );
