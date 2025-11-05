@@ -24,7 +24,7 @@ export async function POST(req) {
       );
     }
 
-    // ✅ Criação da preferência com redirecionamento completo
+    // ✅ Criação da preferência com redirecionamento correto
     const preferenceData = {
       items: [
         {
@@ -34,32 +34,28 @@ export async function POST(req) {
           currency_id: "BRL",
           unit_price: Number(price),
           category_id: "digital_goods",
-          description:
-            "Acesso ao resultado completo e eBooks digitais exclusivos",
+          description: "Acesso ao resultado completo e eBooks digitais exclusivos",
         },
       ],
-      external_reference: referenceId, // 🔗 referência única que liga teste e pagamento
+      external_reference: referenceId, // 🔗 usado para buscar status depois
       statement_descriptor: "TESTETDAH",
-      notification_url: `${BASE_URL}/api/webhook`, // 📡 notificação assíncrona MP → backend
+      notification_url: `${BASE_URL}/api/webhook`,
       back_urls: {
-        success: `${BASE_URL}/resultado?external_reference=${referenceId}&status=success`,
-        failure: `${BASE_URL}/resultado?external_reference=${referenceId}&status=failure`,
-        pending: `${BASE_URL}/resultado?external_reference=${referenceId}&status=pending`,
+        success: `${BASE_URL}/resultado?external_reference=${referenceId}`,
+        failure: `${BASE_URL}/resultado?external_reference=${referenceId}`,
+        pending: `${BASE_URL}/resultado?external_reference=${referenceId}`,
       },
-      auto_return: "approved", // 🔁 redireciona automaticamente após pagamento aprovado
+      auto_return: "approved", // 🔁 redireciona automaticamente quando aprovado
     };
 
-    const mpRes = await fetch(
-      "https://api.mercadopago.com/checkout/preferences",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-        },
-        body: JSON.stringify(preferenceData),
-      }
-    );
+    const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify(preferenceData),
+    });
 
     const rawText = await mpRes.text();
     console.log("📥 Resposta bruta MP:", rawText.slice(0, 300));
@@ -85,6 +81,7 @@ export async function POST(req) {
 
     console.log("✅ Preferência criada:", result.id);
     console.log("🔗 Link de pagamento:", result.init_point);
+    console.log("🔙 Back URLs configuradas:", preferenceData.back_urls);
 
     return new Response(JSON.stringify({ init_point: result.init_point }), {
       status: 200,
@@ -92,9 +89,12 @@ export async function POST(req) {
     });
   } catch (error) {
     console.error("💥 Erro ao criar preferência:", error);
-    return new Response(JSON.stringify({ error: error.message || "Erro interno" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error.message || "Erro interno" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
