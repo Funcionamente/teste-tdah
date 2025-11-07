@@ -6,6 +6,7 @@ export async function POST(req) {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL; // 🚀 Adicionado
 
   try {
     const rawBody = await req.text();
@@ -97,6 +98,14 @@ export async function POST(req) {
       error("⚠️ Falha ao inserir/atualizar tabela resultados_teste:", txt);
     } else {
       log("✅ Tabela resultados_teste atualizada para:", payment.status);
+    }
+
+    // 🚀 Adicionado: Se pagamento foi aprovado, chama o redirect-user
+    if (payment.status === "approved" && BASE_URL) {
+      log("🚀 Pagamento aprovado! Chamando redirect-user...");
+      fetch(`${BASE_URL}/api/redirect-user?ref=${externalRef}`)
+        .then(() => log(`🔗 Redirecionamento disparado para ref=${externalRef}`))
+        .catch((err) => error("❌ Erro ao chamar redirect-user:", err));
     }
 
     return new Response("ok", { status: 200 });
