@@ -3,45 +3,83 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 
 export default function CheckoutPage() {
-  const [loading, setLoading] = useState(false);
+const handlePayment = async () => {
+  setLoading(true);
+  // abre popup imediatamente para evitar bloqueadores
+  const popup = window.open("", "_blank", "noopener,noreferrer");
+  if (!popup) {
+    alert("Por favor permita pop-ups para este site.");
+    setLoading(false);
+    return;
+  }
 
-  // Função chamada ao clicar no botão
-  const handlePayment = async () => {
-    setLoading(true);
-    try {
-      
-      // Gera um ID único (exemplo: o id do resultado do usuário)
-      const referenceId = crypto.randomUUID();
+  try {
+    // gera uma referência única — use a ref que você usa no backend
+    const referenceId = "ref_" + Date.now();
 
-      const response = await fetch("/api/create-preference", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          referenceId: "ref_" + Date.now(),
-          title: "Resultado completo + 2 eBooks exclusivos",
-          price: 4.99,
-        }),
-      });
+    // Cria preferência (backend) — mantenha o mesmo body que já usa
+    const response = await fetch("/api/create-preference", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        referenceId,
+        title: "Resultado completo + 2 eBooks exclusivos",
+        price: 4.99,
+      }),
+    });
 
-      const data = await response.json();
-
-      if (data?.init_point) {
-        // abre checkout do MP no mesmo contexto (sem popup)
-        // Isso funciona em todos os navegadores, inclusive Safari iOS
-        window.location.assign(data.init_point); 
-      } else {
-        alert("Erro ao criar o link de pagamento. Tente novamente.");
-        console.error("Erro:", data);
-      }
-    } catch (err) {
-      console.error("Erro ao iniciar o pagamento:", err);
-      alert("Erro ao iniciar o pagamento.");
-    } finally {
+    const data = await response.json();
+    if (!data?.init_point) {
+      popup.close();
+      alert("Erro ao criar o link de pagamento. Tente novamente.");
+      console.error("Erro:", data);
       setLoading(false);
+      return;
     }
-  };
+
+    // navega o popup para o checkout do Mercado Pago
+    popup.location.href = data.init_point;
+
+    // começar polling para checar status do pagamento
+    let attempts = 0;
+    const maxAttempts = 60; // 60 * 2s = 2 minutos de polling (ajuste se quiser)
+    const interval = 2000; // 2s
+
+    const poller = setInterval(async () => {
+      attempts++;
+      try {
+        const statusRes = await fetch(`/api/payment-status?ref=${encodeURIComponent(referenceId)}`);
+        const statusJson = await statusRes.json();
+        // se erro, continue tentando até maxAttempts
+        if (statusJson?.status === "approved") {
+          clearInterval(poller);
+          try { popup.close(); } catch (e) { /* ignore */ }
+          // redireciona o usuário (página principal) para o fluxo intermediário ou direto ao final
+          window.location.href = `/resultado?external_reference=${encodeURIComponent(referenceId)}&status=success`;
+          return;
+        }
+        if (attempts >= maxAttempts) {
+          clearInterval(poller);
+          // manter popup aberto; avisar usuário
+          alert("Pagamento não aprovado em tempo. Verifique sua forma de pagamento ou tente novamente.");
+        }
+      } catch (err) {
+        console.error("poll error:", err);
+        // não interrompe — tentará de novo
+        if (attempts >= maxAttempts) {
+          clearInterval(poller);
+          alert("Erro ao verificar pagamento. Tente novamente.");
+        }
+      }
+    }, interval);
+  } catch (err) {
+    console.error("Erro ao iniciar o pagamento:", err);
+    try { popup.close(); } catch (e) {}
+    alert("Erro ao iniciar o pagamento.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white">
