@@ -15,8 +15,8 @@ function ResultadoContent() {
       try {
         // ✅ Pega o parâmetro correto (external_reference)
         const ref =
-          searchParams.get("external_reference") ||
-          searchParams.get("ref"); // fallback
+          searchParams.get("ref") ||
+          searchParams.get("external_reference"); 
         const statusMP = searchParams.get("status");
 
         if (!ref) {
