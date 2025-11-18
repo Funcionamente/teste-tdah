@@ -1,13 +1,13 @@
 "use client";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";​
 
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [awaitingPayment, setAwaitingPayment] = useState(false);
   const [retryTimeout, setRetryTimeout] = useState(null);
 
-  // 🔧 Função principal de pagamento (ajustada)
+  // 🔧 Função principal de pagamento (com fallback)
   const handlePayment = async () => {
     setLoading(true);
     setAwaitingPayment(false);
@@ -44,11 +44,13 @@ export default function CheckoutPage() {
           try {
             const res = await fetch(`/api/payment-status?ref=${referenceId}`);
             const result = await res.json();
+            console.log("🔎 Status atual do pagamento:", result.status, "para ref", referenceId);
 
             if (result.status === "approved") {
               clearInterval(interval);
               localStorage.setItem("paymentSuccess", "true");
               if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+              console.log("✅ Pagamento aprovado! Redirecionando usuário...");
               window.location.href = `/resultado?ref=${referenceId}`;
             }
           } catch (err) {
@@ -57,12 +59,33 @@ export default function CheckoutPage() {
         }, 5000);
 
         // 🧩 Detecta se o popup foi fechado antes de pagar
-        const popupCheck = setInterval(() => {
-          if (paymentWindow.closed && !localStorage.getItem("paymentSuccess")) {
+        const popupCheck = setInterval(async () => {
+          if (paymentWindow.closed) {
             clearInterval(popupCheck);
-            clearInterval(interval);
-            setAwaitingPayment(false);
-            alert("O pagamento não foi concluído. Tente novamente.");
+
+            // Caso o pagamento já tenha sido aprovado mas o popup tenha fechado antes
+            try {
+              const res = await fetch(`/api/payment-status?ref=${referenceId}`);
+              const result = await res.json();
+              console.log("🧭 Checando status ao fechar popup:", result.status);
+
+              if (result.status === "approved") {
+                clearInterval(interval);
+                localStorage.setItem("paymentSuccess", "true");
+                console.log("✅ Pagamento aprovado mesmo com popup fechado! Redirecionando...");
+                window.location.href = `/resultado?ref=${referenceId}`;
+                return;
+              }
+            } catch (err) {
+              console.error("Erro ao verificar status no fechamento:", err);
+            }
+
+            // Se ainda não aprovado
+            if (!localStorage.getItem("paymentSuccess")) {
+              clearInterval(interval);
+              setAwaitingPayment(false);
+              alert("O pagamento ainda não foi confirmado. Tente novamente em alguns segundos.");
+            }
           }
         }, 1000);
       } else {
