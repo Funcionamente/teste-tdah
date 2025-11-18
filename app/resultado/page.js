@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { ​Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -13,10 +13,10 @@ function ResultadoContent() {
   useEffect(() => {
     async function verificarPagamento() {
       try {
-        // ✅ Pega o parâmetro correto (external_reference)
+        // ✅ Aceita ambos os parâmetros: ?ref=... ou ?external_reference=...
         const ref =
           searchParams.get("ref") ||
-          searchParams.get("external_reference"); 
+          searchParams.get("external_reference");
         const statusMP = searchParams.get("status");
 
         if (!ref) {
@@ -67,7 +67,38 @@ function ResultadoContent() {
 
     // 🔁 Revalida a cada 8s (Mercado Pago pode demorar)
     const intervalo = setInterval(() => verificarPagamento(), 8000);
-    return () => clearInterval(intervalo);
+
+    // ⚙️ Fallback adicional após 40 segundos
+    const fallback = setTimeout(async () => {
+      try {
+        const ref =
+          searchParams.get("ref") ||
+          searchParams.get("external_reference");
+        if (!ref) return;
+
+        const { data: pagamento } = await supabase
+          .from("payments")
+          .select("status")
+          .eq("id", ref)
+          .single();
+
+        if (pagamento?.status === "approved") {
+          console.log("🧭 Fallback: pagamento aprovado detectado após demora.");
+          setStatus("aprovado");
+          setMensagem("✅ Detectamos seu pagamento aprovado! Carregando seu resultado...");
+          setTimeout(() => {
+            router.push(`/resultado-final?ref=${ref}`);
+          }, 2500);
+        }
+      } catch (err) {
+        console.error("Erro no fallback de verificação tardia:", err);
+      }
+    }, 40000);
+
+    return () => {
+      clearInterval(intervalo);
+      clearTimeout(fallback);
+    };
   }, [router, searchParams]);
 
   return (
@@ -101,7 +132,13 @@ function ResultadoContent() {
       )}
 
       {status === "aprovado" && (
-        <p className="text-green-400 text-lg">{mensagem}</p>
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-pulse mb-4 text-green-400 text-3xl">🎉</div>
+          <p className="text-green-400 text-lg font-semibold">{mensagem}</p>
+          <p className="text-gray-400 text-sm mt-2">
+            Você será redirecionado automaticamente em instantes...
+          </p>
+        </div>
       )}
     </div>
   );
