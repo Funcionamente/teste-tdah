@@ -23,10 +23,10 @@ export default function CheckoutPage() {
   const handlePayment = async () => {
     setLoading(true);
     setAwaitingPayment(false);
-
+  
     try {
       const referenceId = "ref_" + Date.now();
-
+  
       const response = await fetch("/api/create-preference", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,40 +36,46 @@ export default function CheckoutPage() {
           price: 4.99,
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (data?.id) {
+        // Espera o SDK carregar antes de tentar abrir o checkout
+        const ensureSDK = async () => {
+          if (window.MercadoPago) return window.MercadoPago;
+          await new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://sdk.mercadopago.com/js/v2";
+            script.async = true;
+            script.onload = () => resolve(true);
+            document.body.appendChild(script);
+          });
+          return window.MercadoPago;
+        };
+  
+        const MercadoPagoClass = await ensureSDK();
+        const mp = new MercadoPagoClass(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, {
+          locale: "pt-BR",
+        });
+  
+        // Abre o checkout embed (modal)
+        mp.checkout({
+          preference: { id: data.id },
+          autoOpen: true,
+          theme: {
+            elementsColor: "#ffb347",
+            headerColor: "#1a1a1a",
+          },
+        });
+  
         setAwaitingPayment(true);
         setLoading(false);
-
-        // Aguarda o SDK estar disponível
-        const waitForMP = setInterval(() => {
-          if (window.MercadoPago) {
-            clearInterval(waitForMP);
-            const mp = new window.MercadoPago(
-              process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
-              { locale: "pt-BR" }
-            );
-
-            // ✅ Abre o checkout como modal na própria página
-            mp.checkout({
-              preference: { id: data.id },
-              autoOpen: true,
-              theme: {
-                elementsColor: "#ffb347",
-                headerColor: "#1a1a1a",
-              },
-            });
-          }
-        }, 300);
-
-        // 🔁 Polling para detectar aprovação e redirecionar
+  
+        // Polling para detectar pagamento aprovado
         const pollPayment = setInterval(async () => {
           try {
             const res = await fetch(`/api/payment-status?ref=${referenceId}`);
             const result = await res.json();
-
             if (result?.status === "approved") {
               clearInterval(pollPayment);
               console.log("✅ Pagamento aprovado detectado! Redirecionando...");
