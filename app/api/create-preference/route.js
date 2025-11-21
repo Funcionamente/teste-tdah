@@ -97,9 +97,12 @@ export async function POST(req) {
   } catch (error) {
     console.error("💥 Erro ao criar preferência:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Erro interno" }),
+      JSON.stringify({ 
+        init_point: result.init_point,
+        id: result.id, // adiciona o ID da preferência
+      }),
       {
-        status: 500,
+        status: 200,
         headers: { "Content-Type": "application/json" },
       }
     );
