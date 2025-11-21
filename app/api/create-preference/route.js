@@ -37,7 +37,7 @@ export async function POST(req) {
           description: "Acesso ao resultado completo e eBooks digitais exclusivos",
         },
       ],
-      external_reference: referenceId, // 🔗 usado para buscar status depois
+      external_reference: referenceId, //  usado para buscar status depois
       statement_descriptor: "TESTETDAH",
       notification_url: `${BASE_URL}/api/webhook`,
       back_urls: {
@@ -83,10 +83,17 @@ export async function POST(req) {
     console.log("🔗 Link de pagamento:", result.init_point);
     console.log("🔙 Back URLs configuradas:", preferenceData.back_urls);
 
-    return new Response(JSON.stringify({ init_point: result.init_point }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    // ✅ Ajuste: incluir o ID da preferência no retorno
+    return new Response(
+      JSON.stringify({
+        id: result.id, // 🆕 Necessário para o checkout embed
+        init_point: result.init_point, // Mantido para compatibilidade
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
     console.error("💥 Erro ao criar preferência:", error);
     return new Response(
