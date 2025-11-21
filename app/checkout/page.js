@@ -12,10 +12,10 @@ export default function CheckoutPage() {
   const handlePayment = async () => {
     setLoading(true);
     setAwaitingPayment(false);
-
+  
     try {
       const referenceId = "ref_" + Date.now();
-
+  
       const response = await fetch("/api/create-preference", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -25,81 +25,18 @@ export default function CheckoutPage() {
           price: 4.99,
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (data?.init_point) {
-        const paymentWindow = window.open(
-          data.init_point,
-          "_blank",
-          "width=600,height=800,noopener,noreferrer"
-        );
-        popupRef.current = paymentWindow;
-
-        setAwaitingPayment(true);
-        setLoading(false);
-
-        const pollPayment = async () => {
-          try {
-            const res = await fetch(`/api/payment-status?ref=${referenceId}`);
-            const result = await res.json();
-            console.log("  Status atual do pagamento:", result.status);
-
-            if (result.status === "approved") {
-              console.log("  Pagamento aprovado detectado! Redirecionando...");
-
-              // Marca no localStorage
-              localStorage.setItem("paymentSuccess", "true");
-
-              // Fecha popup com segurança
-              try {
-                if (paymentWindow && !paymentWindow.closed) {
-                  paymentWindow.close();
-                } else {
-                  // fallback — alguns browsers bloqueiam close()
-                  window.open("", "_self")?.close();
-                }
-              } catch (e) {
-                console.warn("  Falha ao fechar popup:", e);
-              }
-
-              // Redirecionamento seguro
-              setTimeout(() => {
-                try {
-                  window.location.href = `/resultado?ref=${referenceId}`;
-                } catch (e) {
-                  console.error("  Falha ao redirecionar via router, fallback:", e);
-                  window.location.assign(`/resultado?ref=${referenceId}`);
-                }
-              }, 500);
-
-              return true;
-            }
-            return false;
-          } catch (err) {
-            console.error("Erro ao verificar status:", err);
-            return false;
-          }
-        };
-
-        // Polling principal
-        const interval = setInterval(async () => {
-          const done = await pollPayment();
-          if (done) clearInterval(interval);
-        }, 5000);
-
-        // Fallback quando popup for fechado manualmente
-        const popupCheck = setInterval(async () => {
-          if (paymentWindow.closed) {
-            clearInterval(popupCheck);
-            const done = await pollPayment();
-            if (!done) {
-              clearInterval(interval);
-              setAwaitingPayment(false);
-              alert("O pagamento ainda não foi confirmado. Tente novamente em alguns segundos.");
-            }
-          }
-        }, 1000);
+        //  Redireciona o usuário diretamente para o checkout do Mercado Pago
+        window.location.href = data.init_point;
+  
+        // Observação:
+        // O Mercado Pago, ao concluir o pagamento, automaticamente redireciona
+        // o usuário de volta para /resultado?external_reference=...
+        // conforme configurado nos back_urls no create-preference.js
+  
       } else {
         alert("Erro ao criar o link de pagamento. Tente novamente.");
         console.error("Erro:", data);
@@ -111,6 +48,7 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
 
   // Limpa flags se o usuário recarregar
   useEffect(() => {
