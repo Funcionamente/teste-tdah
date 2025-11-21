@@ -1,4 +1,4 @@
-const NEXT_PUBLIC_MP_PUBLIC_KEY = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY;
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export async function POST(req) {
@@ -8,8 +8,8 @@ export async function POST(req) {
 
     const { referenceId, title, price } = body;
 
-    if (!NEXT_PUBLIC_MP_PUBLIC_KEY) {
-      console.error("❌ Falta NEXT_PUBLIC_MP_PUBLIC_KEY no ambiente");
+    if (!MP_ACCESS_TOKEN) {
+      console.error("❌ Falta MP_ACCESS_TOKEN no ambiente");
       return new Response(
         JSON.stringify({ error: "Faltando token do Mercado Pago" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
@@ -52,7 +52,7 @@ export async function POST(req) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${NEXT_PUBLIC_MP_PUBLIC_KEY}`,
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
       },
       body: JSON.stringify(preferenceData),
     });
