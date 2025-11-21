@@ -8,18 +8,18 @@ export default function CheckoutPage() {
   const [retryTimeout, setRetryTimeout] = useState(null);
   const popupRef = useRef(null);
 
-  //  Carrega o SDK do Mercado Pago
+  // ✅Carrega o SDK do Mercado Pago
   useEffect(() => {
     if (!window.MercadoPago) {
       const script = document.createElement("script");
       script.src = "https://sdk.mercadopago.com/js/v2";
       script.async = true;
-      script.onload = () => console.log("  Mercado Pago SDK carregado");
+      script.onload = () => console.log("✅ Mercado Pago SDK carregado");
       document.body.appendChild(script);
     }
   }, []);
 
-  //  Novo handlePayment com checkout embed (sem popup nem redirect manual)
+  // ✅ Novo handlePayment com checkout embed (sem popup nem redirect manual)
   const handlePayment = async () => {
     setLoading(true);
     setAwaitingPayment(false);
@@ -52,7 +52,7 @@ export default function CheckoutPage() {
               { locale: "pt-BR" }
             );
 
-            //  Abre o checkout como modal na própria página
+            // ✅ Abre o checkout como modal na própria página
             mp.checkout({
               preference: { id: data.id },
               autoOpen: true,
@@ -64,7 +64,7 @@ export default function CheckoutPage() {
           }
         }, 300);
 
-        //  Polling para detectar aprovação e redirecionar
+        // 🔁 Polling para detectar aprovação e redirecionar
         const pollPayment = setInterval(async () => {
           try {
             const res = await fetch(`/api/payment-status?ref=${referenceId}`);
@@ -72,7 +72,7 @@ export default function CheckoutPage() {
 
             if (result?.status === "approved") {
               clearInterval(pollPayment);
-              console.log("  Pagamento aprovado detectado! Redirecionando...");
+              console.log("✅ Pagamento aprovado detectado! Redirecionando...");
               localStorage.setItem("paymentSuccess", "true");
               window.location.href = `/resultado?ref=${referenceId}`;
             }
@@ -127,9 +127,9 @@ export default function CheckoutPage() {
               </h2>
 
               <ul className="space-y-3 text-lg text-gray-200">
-                <li>  Descobrir o seu nível de atenção e foco</li>
-                <li>  Receber explicação detalhada do que o resultado significa</li>
-                <li>  Ganhar 2 e-books exclusivos sobre TDAH</li>
+                <li>✔️ Descobrir o seu nível de atenção e foco</li>
+                <li>✔️ Receber explicação detalhada do que o resultado significa</li>
+                <li>✔️ Ganhar 2 e-books exclusivos sobre TDAH</li>
               </ul>
 
               <div className="mt-8 flex items-center justify-center space-x-2 text-gray-300 text-sm">
