@@ -20,38 +20,70 @@ export default function CheckoutPage() {
   }, []);
 
   // ✅ Novo handlePayment com checkout embed (sem popup nem redirect manual)
-const handlePayment = async () => {
-  setLoading(true);
-
-  try {
-    const referenceId = "ref_" + Date.now();
-
-    const response = await fetch("/api/create-preference", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        referenceId,
-        title: "Resultado completo + 2 eBooks exclusivos",
-        price: 4.99,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data?.init_point) {
-      // 🔥 Redireciona imediatamente para a página de pagamento do Mercado Pago
-      window.location.href = data.init_point;
-    } else {
-      alert("Erro ao criar o link de pagamento. Tente novamente.");
-      console.error("Erro:", data);
+  const handlePayment = async () => {
+    setLoading(true);
+    setAwaitingPayment(false);
+  
+    try {
+      const referenceId = "ref_" + Date.now();
+  
+      const response = await fetch("/api/create-preference", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          referenceId,
+          title: "Resultado completo + 2 eBooks exclusivos",
+          price: 4.99,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (data?.id) {
+        // ✅ Garante que o SDK esteja carregado antes de abrir o checkout
+        const ensureSDK = async () => {
+          if (window.MercadoPago) return window.MercadoPago;
+          await new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://sdk.mercadopago.com/js/v2";
+            script.async = true;
+            script.onload = () => resolve(true);
+            document.body.appendChild(script);
+          });
+          return window.MercadoPago;
+        };
+  
+        const MercadoPagoClass = await ensureSDK();
+  
+        // ✅ Inicializa o Mercado Pago
+        const mp = new MercadoPagoClass(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, {
+          locale: "pt-BR",
+        });
+  
+        // ✅ Abre o checkout embutido (modal) no seu domínio
+        mp.checkout({
+          preference: { id: data.id },
+          autoOpen: true, // Abre automaticamente o modal
+          theme: {
+            elementsColor: "#ffb347",
+            headerColor: "#1a1a1a",
+          },
+        });
+  
+        // Exibe a tela de “aguardando pagamento”
+        setAwaitingPayment(true);
+        setLoading(false);
+      } else {
+        alert("Erro ao criar o link de pagamento. Tente novamente.");
+        console.error("Erro:", data);
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Erro ao iniciar o pagamento:", err);
+      alert("Erro ao iniciar o pagamento.");
       setLoading(false);
     }
-  } catch (err) {
-    console.error("Erro ao iniciar o pagamento:", err);
-    alert("Erro ao iniciar o pagamento.");
-    setLoading(false);
-  }
-};
+  };
 
   // Limpa flags se o usuário recarregar
   useEffect(() => {
