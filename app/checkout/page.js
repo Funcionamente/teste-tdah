@@ -2,20 +2,31 @@
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 
-
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [awaitingPayment, setAwaitingPayment] = useState(false);
   const [retryTimeout, setRetryTimeout] = useState(null);
   const popupRef = useRef(null);
 
+  //  Carrega o SDK do Mercado Pago
+  useEffect(() => {
+    if (!window.MercadoPago) {
+      const script = document.createElement("script");
+      script.src = "https://sdk.mercadopago.com/js/v2";
+      script.async = true;
+      script.onload = () => console.log("  Mercado Pago SDK carregado");
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  //  Novo handlePayment com checkout embed (sem popup nem redirect manual)
   const handlePayment = async () => {
     setLoading(true);
     setAwaitingPayment(false);
-  
+
     try {
       const referenceId = "ref_" + Date.now();
-  
+
       const response = await fetch("/api/create-preference", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -25,18 +36,50 @@ export default function CheckoutPage() {
           price: 4.99,
         }),
       });
-  
+
       const data = await response.json();
-  
-      if (data?.init_point) {
-        //  Redireciona o usuário diretamente para o checkout do Mercado Pago
-        window.location.href = data.init_point;
-  
-        // Observação:
-        // O Mercado Pago, ao concluir o pagamento, automaticamente redireciona
-        // o usuário de volta para /resultado?external_reference=...
-        // conforme configurado nos back_urls no create-preference.js
-  
+
+      if (data?.id) {
+        setAwaitingPayment(true);
+        setLoading(false);
+
+        // Aguarda o SDK estar disponível
+        const waitForMP = setInterval(() => {
+          if (window.MercadoPago) {
+            clearInterval(waitForMP);
+            const mp = new window.MercadoPago(
+              process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
+              { locale: "pt-BR" }
+            );
+
+            //  Abre o checkout como modal na própria página
+            mp.checkout({
+              preference: { id: data.id },
+              autoOpen: true,
+              theme: {
+                elementsColor: "#ffb347",
+                headerColor: "#1a1a1a",
+              },
+            });
+          }
+        }, 300);
+
+        //  Polling para detectar aprovação e redirecionar
+        const pollPayment = setInterval(async () => {
+          try {
+            const res = await fetch(`/api/payment-status?ref=${referenceId}`);
+            const result = await res.json();
+
+            if (result?.status === "approved") {
+              clearInterval(pollPayment);
+              console.log("  Pagamento aprovado detectado! Redirecionando...");
+              localStorage.setItem("paymentSuccess", "true");
+              window.location.href = `/resultado?ref=${referenceId}`;
+            }
+          } catch (e) {
+            console.error("Erro ao verificar pagamento:", e);
+          }
+        }, 4000);
       } else {
         alert("Erro ao criar o link de pagamento. Tente novamente.");
         console.error("Erro:", data);
@@ -48,7 +91,6 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-
 
   // Limpa flags se o usuário recarregar
   useEffect(() => {
