@@ -150,5 +150,5 @@ export default function ResultadoIntermediario() {
     <Suspense fallback={<div className="text-white p-8 text-center">Carregando...</div>}>
       <ResultadoContent />
     </Suspense>
-  );
+  );​
 }
