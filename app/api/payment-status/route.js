@@ -1,11 +1,8 @@
 export async function GET(req) {
   try {
-    const { searchParams } = new URL(r​eq.url);
+    const { searchParams } = new URL(req.url);
     const ref = searchParams.get("ref");
-    if (!ref)
-      return new Response(JSON.stringify({ error: "missing ref" }), {
-        status: 400,
-      });
+    if (!ref) return new Response(JSON.stringify({ error: "missing ref" }), { status: 400 });
 
     const SUPABASE_URL = process.env.SUPABASE_URL;
     const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
