@@ -5,21 +5,25 @@ import { useState, useEffect } from "react";
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [awaitingPayment, setAwaitingPayment] = useState(false);
+  const [paymentApproved, setPaymentApproved] = useState(false);
+  const [referenceId, setReferenceId] = useState(null);
   const [retryTimeout, setRetryTimeout] = useState(null);
-  
-  // 🔧 Função principal de pagamento (com fallback)
+
+  // 🔧 Função principal de pagamento
   const handlePayment = async () => {
     setLoading(true);
     setAwaitingPayment(false);
+    setPaymentApproved(false);
 
     try {
-      const referenceId = "ref_" + Date.now();
+      const ref = "ref_" + Date.now();
+      setReferenceId(ref);
 
       const response = await fetch("/api/create-preference", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          referenceId,
+          referenceId: ref,
           title: "Resultado completo + 2 eBooks exclusivos",
           price: 4.99,
         }),
@@ -28,7 +32,7 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (data?.init_point) {
-        // Abre o checkout em popup (janela secundária)
+        // ✅ Abre o checkout em uma nova aba
         const paymentWindow = window.open(
           data.init_point,
           "_blank",
@@ -42,16 +46,21 @@ export default function CheckoutPage() {
         // ⏱️ Verifica o status do pagamento a cada 5 segundos
         const interval = setInterval(async () => {
           try {
-            const res = await fetch(`/api/payment-status?ref=${referenceId}`);
+            const res = await fetch(`/api/payment-status?ref=${ref}`);
             const result = await res.json();
-            console.log("🔎 Status atual do pagamento:", result.status, "para ref", referenceId);
+            console.log("🔎 Status atual do pagamento:", result.status);
 
             if (result.status === "approved") {
               clearInterval(interval);
               localStorage.setItem("paymentSuccess", "true");
+              setPaymentApproved(true);
               if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
-              console.log("✅ Pagamento aprovado! Redirecionando usuário...");
-              window.location.href = `/resultado?ref=${referenceId}`;
+              console.log("✅ Pagamento aprovado!");
+              
+              // Redirecionamento automático
+              setTimeout(() => {
+                window.location.href = `/resultado?ref=${ref}`;
+              }, 2000);
             }
           } catch (err) {
             console.error("Erro ao verificar status:", err);
@@ -62,32 +71,22 @@ export default function CheckoutPage() {
         const popupCheck = setInterval(async () => {
           if (paymentWindow.closed) {
             clearInterval(popupCheck);
+            console.log("💡 Popup fechado. Verificando status...");
 
-            // Caso o pagamento já tenha sido aprovado mas o popup tenha fechado antes
             try {
-              const res = await fetch(`/api/payment-status?ref=${referenceId}`);
+              const res = await fetch(`/api/payment-status?ref=${ref}`);
               const result = await res.json();
-              console.log("🧭 Checando status ao fechar popup:", result.status);
-
               if (result.status === "approved") {
                 clearInterval(interval);
                 localStorage.setItem("paymentSuccess", "true");
-                console.log("✅ Pagamento aprovado mesmo com popup fechado! Redirecionando...");
-                window.location.href = `/resultado?ref=${referenceId}`;
-                return;
+                setPaymentApproved(true);
+                console.log("✅ Pagamento aprovado mesmo com popup fechado!");
               }
             } catch (err) {
               console.error("Erro ao verificar status no fechamento:", err);
             }
-
-            // Se ainda não aprovado
-            if (!localStorage.getItem("paymentSuccess")) {
-              clearInterval(interval);
-              setAwaitingPayment(false);
-              alert("O pagamento ainda não foi confirmado. Tente novamente em alguns segundos.");
-            }
           }
-        }, 1000);
+        }, 2000);
       } else {
         alert("Erro ao criar o link de pagamento. Tente novamente.");
         console.error("Erro:", data);
@@ -105,6 +104,26 @@ export default function CheckoutPage() {
     localStorage.removeItem("paymentSuccess");
     if (retryTimeout) clearTimeout(retryTimeout);
   }, []);
+
+  // 🔁 Verifica status se o usuário recarregar a página enquanto aguardava
+  useEffect(() => {
+    if (!awaitingPayment || !referenceId) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/payment-status?ref=${referenceId}`);
+        const result = await res.json();
+        if (result.status === "approved") {
+          clearInterval(interval);
+          setPaymentApproved(true);
+          localStorage.setItem("paymentSuccess", "true");
+          console.log("✅ Pagamento aprovado após reload!");
+        }
+      } catch (err) {
+        console.error("Erro ao verificar status no reload:", err);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [awaitingPayment, referenceId]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white">
@@ -140,68 +159,56 @@ export default function CheckoutPage() {
                 <li>✔️ Ganhar 2 e-books exclusivos sobre TDAH</li>
               </ul>
 
-              {/* Selo de segurança */}
               <div className="mt-8 flex items-center justify-center space-x-2 text-gray-300 text-sm">
                 <div className="w-5 h-5">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.8}
-                    stroke="currentColor"
-                    className="w-5 h-5 text-green-400"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M16.5 10.5V7.5a4.5 4.5 0 00-9 0v3m10.5 0a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12a1.5 1.5 0 01-1.5-1.5v-6a1.5 1.5 0 011.5-1.5m10.5 0h-10.5"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5 text-green-400">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V7.5a4.5 4.5 0 00-9 0v3m10.5 0a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12a1.5 1.5 0 01-1.5-1.5v-6a1.5 1.5 0 011.5-1.5m10.5 0h-10.5" />
                   </svg>
                 </div>
                 <p>Pagamento 100% seguro via Mercado Pago</p>
               </div>
 
-              {/* Botão de pagamento dinâmico */}
-              <motion.div
-                className="mt-10"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
+              <motion.div className="mt-10" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
                 <button
                   onClick={handlePayment}
                   disabled={loading}
                   className={`inline-block ${
-                    loading
-                      ? "bg-gray-500 cursor-not-allowed"
-                      : "bg-orange-500 hover:bg-orange-600"
+                    loading ? "bg-gray-500 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600"
                   } text-white font-semibold py-4 px-10 rounded-full shadow-lg transition-all duration-300 hover:shadow-orange-500/40 backdrop-blur-md bg-opacity-90`}
                 >
-                  {loading
-                    ? "Gerando link de pagamento..."
-                    : "ACESSAR MEU RESULTADO AGORA"}
+                  {loading ? "Gerando link de pagamento..." : "ACESSAR MEU RESULTADO AGORA"}
                 </button>
                 <p className="text-sm text-gray-400 mt-3">
-                  (Pagamento único. Após a confirmação, você será redirecionado
-                  automaticamente para ver o seu resultado.)
+                  (Pagamento único. Após a confirmação, você será redirecionado automaticamente para ver o seu resultado.)
                 </p>
               </motion.div>
             </>
           ) : (
-            // Tela de "Aguardando Confirmação"
+            // Tela "aguardando pagamento"
             <motion.div
               className="flex flex-col items-center justify-center py-12"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="w-12 h-12 border-4 border-t-orange-400 border-gray-700 rounded-full animate-spin mb-6"></div>
-              <p className="text-lg text-gray-200">
-                Aguardando confirmação do pagamento...
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Assim que o pagamento for aprovado, você será redirecionado automaticamente.
-              </p>
+              {!paymentApproved ? (
+                <>
+                  <div className="w-12 h-12 border-4 border-t-orange-400 border-gray-700 rounded-full animate-spin mb-6"></div>
+                  <p className="text-lg text-gray-200">Aguardando confirmação do pagamento...</p>
+                  <p className="text-sm text-gray-500 mt-2">Assim que for aprovado, você será redirecionado automaticamente.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg text-green-400 mb-4 font-semibold">✅ Pagamento confirmado!</p>
+                  <p className="text-gray-300 mb-6">Clique abaixo se não foi redirecionado automaticamente.</p>
+                  <button
+                    onClick={() => window.location.href = `/resultado?ref=${referenceId}`}
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 hover:shadow-orange-500/40"
+                  >
+                    VER MEU RESULTADO AGORA
+                  </button>
+                </>
+              )}
             </motion.div>
           )}
         </motion.div>
@@ -211,9 +218,7 @@ export default function CheckoutPage() {
       <footer className="bg-black/80 text-gray-300 text-sm text-center py-6 mt-16 border-t border-gray-800">
         <p>
           Este teste foi desenvolvido seguindo padrões internacionais de triagem
-          em saúde mental (ASRS v1.1) e respeita as normas éticas e de privacidade. É uma
-          ferramenta informativa e não substitui diagnóstico médico ou
-          psicológico.
+          em saúde mental (ASRS v1.1). É uma ferramenta informativa e não substitui diagnóstico médico.
         </p>
       </footer>
     </div>
