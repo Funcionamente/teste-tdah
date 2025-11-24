@@ -1,5 +1,5 @@
-//ultima pagina de resultado validada
 "use client";
+
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
@@ -43,9 +43,14 @@ export default function Resultado() {
           return;
         }
 
+        console.log("📊 Status do pagamento na página final:", pagamento.status);
+
+        // 🔁 Ajuste: caso o status ainda não tenha propagado, recarrega após 3s
         if (pagamento.status !== "approved") {
-          setErro("Pagamento ainda não foi aprovado.");
-          setLoading(false);
+          console.log("⏳ Pagamento ainda pendente, tentando novamente em 3 segundos...");
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
           return;
         }
 
@@ -243,7 +248,7 @@ export default function Resultado() {
           className="mt-10 bg-gradient-to-r from-[#ffb347] to-[#ffcc70] text-black font-semibold p-6 rounded-xl shadow-lg"
         >
           <p>
-            Lembre-se: este teste é apenas uma triagem inicial baseada em critérios da OMS. 
+            Lembre-se: este teste é apenas uma triagem inicial baseada em critérios da OMS.
             Somente um profissional qualificado pode oferecer um diagnóstico preciso.
           </p>
           <Link
