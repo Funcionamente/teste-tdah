@@ -2,11 +2,11 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
-export default function CheckoutPage() {​
+export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [awaitingPayment, setAwaitingPayment] = useState(false);
   const [retryTimeout, setRetryTimeout] = useState(null);
-
+  
   // 🔧 Função principal de pagamento (com fallback)
   const handlePayment = async () => {
     setLoading(true);
