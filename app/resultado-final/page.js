@@ -21,7 +21,7 @@ export default function Resultado() {
     async function fetchResultado() {
       try {
         const params = new URLSearchParams(window.location.search);
-        const ref = params.get("external_reference");
+        const ref = params.get("ref") || params.get("external_reference");
 
         if (!ref) {
           setErro("Sessão inválida. Tente novamente.");
