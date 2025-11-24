@@ -1,32 +1,20 @@
 "use client";
 import { motion } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
-export default function CheckoutPage() {
+export default function CheckoutPage() {​
   const [loading, setLoading] = useState(false);
   const [awaitingPayment, setAwaitingPayment] = useState(false);
   const [retryTimeout, setRetryTimeout] = useState(null);
-  const popupRef = useRef(null);
 
-  // ✅Carrega o SDK do Mercado Pago
-  useEffect(() => {
-    if (!window.MercadoPago) {
-      const script = document.createElement("script");
-      script.src = "https://sdk.mercadopago.com/js/v2";
-      script.async = true;
-      script.onload = () => console.log("✅ Mercado Pago SDK carregado");
-      document.body.appendChild(script);
-    }
-  }, []);
-
-  // ✅ Novo handlePayment com checkout embed (sem popup nem redirect manual)
+  // 🔧 Função principal de pagamento (com fallback)
   const handlePayment = async () => {
     setLoading(true);
     setAwaitingPayment(false);
-  
+
     try {
       const referenceId = "ref_" + Date.now();
-  
+
       const response = await fetch("/api/create-preference", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,43 +24,70 @@ export default function CheckoutPage() {
           price: 4.99,
         }),
       });
-  
+
       const data = await response.json();
-  
-      if (data?.id) {
-        // ✅ Garante que o SDK esteja carregado antes de abrir o checkout
-        const ensureSDK = async () => {
-          if (window.MercadoPago) return window.MercadoPago;
-          await new Promise((resolve) => {
-            const script = document.createElement("script");
-            script.src = "https://sdk.mercadopago.com/js/v2";
-            script.async = true;
-            script.onload = () => resolve(true);
-            document.body.appendChild(script);
-          });
-          return window.MercadoPago;
-        };
-  
-        const MercadoPagoClass = await ensureSDK();
-  
-        // ✅ Inicializa o Mercado Pago
-        const mp = new MercadoPagoClass(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, {
-          locale: "pt-BR",
-        });
-  
-        // ✅ Abre o checkout embutido (modal) no seu domínio
-        mp.checkout({
-          preference: { id: data.id },
-          autoOpen: true, // Abre automaticamente o modal
-          theme: {
-            elementsColor: "#ffb347",
-            headerColor: "#1a1a1a",
-          },
-        });
-  
-        // Exibe a tela de “aguardando pagamento”
+
+      if (data?.init_point) {
+        // Abre o checkout em popup (janela secundária)
+        const paymentWindow = window.open(
+          data.init_point,
+          "_blank",
+          "width=600,height=800,noopener,noreferrer"
+        );
+
+        // Exibe tela de "aguardando confirmação"
         setAwaitingPayment(true);
         setLoading(false);
+
+        // ⏱️ Verifica o status do pagamento a cada 5 segundos
+        const interval = setInterval(async () => {
+          try {
+            const res = await fetch(`/api/payment-status?ref=${referenceId}`);
+            const result = await res.json();
+            console.log("🔎 Status atual do pagamento:", result.status, "para ref", referenceId);
+
+            if (result.status === "approved") {
+              clearInterval(interval);
+              localStorage.setItem("paymentSuccess", "true");
+              if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+              console.log("✅ Pagamento aprovado! Redirecionando usuário...");
+              window.location.href = `/resultado?ref=${referenceId}`;
+            }
+          } catch (err) {
+            console.error("Erro ao verificar status:", err);
+          }
+        }, 5000);
+
+        // 🧩 Detecta se o popup foi fechado antes de pagar
+        const popupCheck = setInterval(async () => {
+          if (paymentWindow.closed) {
+            clearInterval(popupCheck);
+
+            // Caso o pagamento já tenha sido aprovado mas o popup tenha fechado antes
+            try {
+              const res = await fetch(`/api/payment-status?ref=${referenceId}`);
+              const result = await res.json();
+              console.log("🧭 Checando status ao fechar popup:", result.status);
+
+              if (result.status === "approved") {
+                clearInterval(interval);
+                localStorage.setItem("paymentSuccess", "true");
+                console.log("✅ Pagamento aprovado mesmo com popup fechado! Redirecionando...");
+                window.location.href = `/resultado?ref=${referenceId}`;
+                return;
+              }
+            } catch (err) {
+              console.error("Erro ao verificar status no fechamento:", err);
+            }
+
+            // Se ainda não aprovado
+            if (!localStorage.getItem("paymentSuccess")) {
+              clearInterval(interval);
+              setAwaitingPayment(false);
+              alert("O pagamento ainda não foi confirmado. Tente novamente em alguns segundos.");
+            }
+          }
+        }, 1000);
       } else {
         alert("Erro ao criar o link de pagamento. Tente novamente.");
         console.error("Erro:", data);
@@ -101,7 +116,7 @@ export default function CheckoutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-           Acesse o seu resultado completo e receba os seus 2 e-books agora mesmo
+          🧠 Acesse o seu resultado completo e receba os seus 2 e-books agora mesmo
         </motion.h1>
       </header>
 
@@ -125,6 +140,7 @@ export default function CheckoutPage() {
                 <li>✔️ Ganhar 2 e-books exclusivos sobre TDAH</li>
               </ul>
 
+              {/* Selo de segurança */}
               <div className="mt-8 flex items-center justify-center space-x-2 text-gray-300 text-sm">
                 <div className="w-5 h-5">
                   <svg
@@ -145,6 +161,7 @@ export default function CheckoutPage() {
                 <p>Pagamento 100% seguro via Mercado Pago</p>
               </div>
 
+              {/* Botão de pagamento dinâmico */}
               <motion.div
                 className="mt-10"
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -165,11 +182,13 @@ export default function CheckoutPage() {
                     : "ACESSAR MEU RESULTADO AGORA"}
                 </button>
                 <p className="text-sm text-gray-400 mt-3">
-                  (Pagamento único. Após a confirmação, você será redirecionado automaticamente.)
+                  (Pagamento único. Após a confirmação, você será redirecionado
+                  automaticamente para ver o seu resultado.)
                 </p>
               </motion.div>
             </>
           ) : (
+            // Tela de "Aguardando Confirmação"
             <motion.div
               className="flex flex-col items-center justify-center py-12"
               initial={{ opacity: 0 }}
@@ -188,10 +207,13 @@ export default function CheckoutPage() {
         </motion.div>
       </main>
 
+      {/* Rodapé */}
       <footer className="bg-black/80 text-gray-300 text-sm text-center py-6 mt-16 border-t border-gray-800">
         <p>
           Este teste foi desenvolvido seguindo padrões internacionais de triagem
-          em saúde mental (ASRS v1.1). É uma ferramenta informativa e não substitui diagnóstico médico.
+          em saúde mental (ASRS v1.1) e respeita as normas éticas e de privacidade. É uma
+          ferramenta informativa e não substitui diagnóstico médico ou
+          psicológico.
         </p>
       </footer>
     </div>
