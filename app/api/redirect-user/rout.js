@@ -14,12 +14,16 @@ export async function GET(req) {
       return new Response("Configuração incorreta", { status: 500 });
     }
 
-    console.log(`🚀 Redirecionando automaticamente para /resultado ref=${ref}`);
+    console.log(`🚀 Redirecionamento virtual para /resultado?ref=${ref}`);
 
-    // Redireciona o navegador do usuário (302)
-    return Response.redirect(
-      `${BASE_URL}/resultado?external_reference=${ref}&status=success`,
-      302
+    // ✅ Apenas confirma que o backend disparou a atualização
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Redirecionamento preparado",
+        next: `${BASE_URL}/resultado?external_reference=${ref}&status=success`,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (err) {
     console.error("💥 Erro em /api/redirect-user:", err);
