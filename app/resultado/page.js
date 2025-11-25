@@ -1,4 +1,4 @@
-"use client";
+"use cl​ient";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,16 +8,21 @@ function ResultadoContent() {
   const [status, setStatus] = useState("loading");
   const [mensagem, setMensagem] = useState("Verificando status do pagamento...");
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams?.();
 
   useEffect(() => {
     async function verificarPagamento() {
       try {
-        // ✅ Aceita ambos os parâmetros: ?ref=... ou ?external_reference=...
+        // ✅ Leitura robusta: garante captura mesmo se useSearchParams falhar
+        const params = new URLSearchParams(window.location.search);
         const ref =
-          searchParams.get("ref") ||
-          searchParams.get("external_reference");
-        const statusMP = searchParams.get("status");
+          params.get("ref") ||
+          params.get("external_reference") ||
+          searchParams?.get("ref") ||
+          searchParams?.get("external_reference");
+
+        const statusMP =
+          params.get("status") || searchParams?.get("status");
 
         if (!ref) {
           setStatus("erro");
@@ -71,9 +76,13 @@ function ResultadoContent() {
     // ⚙️ Fallback adicional após 40 segundos
     const fallback = setTimeout(async () => {
       try {
+        const params = new URLSearchParams(window.location.search);
         const ref =
-          searchParams.get("ref") ||
-          searchParams.get("external_reference");
+          params.get("ref") ||
+          params.get("external_reference") ||
+          searchParams?.get("ref") ||
+          searchParams?.get("external_reference");
+
         if (!ref) return;
 
         const { data: pagamento } = await supabase
