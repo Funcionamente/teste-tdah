@@ -21,7 +21,7 @@ export async function GET(req) {
       JSON.stringify({
         success: true,
         message: "Redirecionamento preparado",
-        next: `${BASE_URL}/resultado?ref=${ref}&status=success`,
+        next: `${BASE_URL}/resultado?external_reference=${ref}&status=success`,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
