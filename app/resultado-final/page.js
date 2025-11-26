@@ -1,12 +1,13 @@
 "use client";
 
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
-export default function Resultado() {
+export default function ResultadoFinal() {
   const [loading, setLoading] = useState(true);
   const [pontuacao, setPontuacao] = useState(null);
   const [faixa, setFaixa] = useState("");
@@ -17,10 +18,12 @@ export default function Resultado() {
   const total = 150;
 
   useEffect(() => {
+    console.log("🚀 Página resultado-final montada");
     async function fetchResultado() {
       try {
         const params = new URLSearchParams(window.location.search);
         const ref = params.get("ref") || params.get("external_reference");
+        console.log("🔎 Ref encontrado:", ref);
 
         if (!ref) {
           setErro("Sessão inválida. Tente novamente.");
@@ -28,49 +31,62 @@ export default function Resultado() {
           return;
         }
 
-        // 🔹 Buscar pagamento confirmado (por id ou mp_payment_id)
+        // Buscar pagamento
+        console.log("💾 Buscando pagamento no Supabase...");
         const { data: pagamento, error: pagamentoError } = await supabase
           .from("payments")
           .select("id, mp_payment_id, status")
           .or(`id.eq.${ref},mp_payment_id.eq.${ref}`)
-          .single();
+          .maybeSingle();
 
-        if (pagamentoError || !pagamento) {
-          console.error("Erro ao buscar pagamento:", pagamentoError);
-          setErro("Pagamento não encontrado ou inválido.");
+        console.log("🧾 Pagamento retornado:", pagamento);
+
+        if (pagamentoError) {
+          console.error("❌ Erro pagamento:", pagamentoError);
+          setErro("Erro ao verificar pagamento.");
           setLoading(false);
           return;
         }
 
-        console.log("📊 Status do pagamento na página final:", pagamento.status);
-
-        if (pagamento.status !== "approved") {
-          console.log("⏳ Pagamento ainda pendente, tentando novamente em 3 segundos...");
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
+        if (!pagamento) {
+          setErro("Pagamento não encontrado.");
+          setLoading(false);
           return;
         }
 
-        // 🔹 Buscar resultado do teste pelo ref_pagamento (sem email)
+        if (pagamento.status !== "approved") {
+          console.log("⏳ Pagamento pendente, tentando novamente em 3s...");
+          setTimeout(() => window.location.reload(), 3000);
+          return;
+        }
+
+        // Buscar resultado do teste
+        console.log("📊 Buscando resultado do teste vinculado...");
         const { data: resultado, error: resultadoError } = await supabase
           .from("resultados_teste")
           .select("*")
           .or(`ref_pagamento.eq.${ref},mp_payment_id.eq.${ref}`)
-          .order("criado_em", { ascending: false })
-          .limit(1)
-          .single();
+          .maybeSingle();
 
-        if (resultadoError || !resultado) {
-          console.error("❌ Resultado do teste não encontrado:", resultadoError);
-          setErro("Resultado do teste não encontrado para este pagamento.");
+        console.log("📄 Resultado retornado:", resultado);
+
+        if (resultadoError) {
+          console.error("❌ Erro resultado:", resultadoError);
+          setErro("Erro ao buscar resultado do teste.");
           setLoading(false);
           return;
         }
 
-        // 🔹 Calcular faixa e descrições
+        if (!resultado) {
+          setErro("Resultado não encontrado para este pagamento.");
+          setLoading(false);
+          return;
+        }
+
+        // Calcular e exibir
         const score = Number(resultado.pontuacao) || 0;
         setPontuacao(score);
+        console.log("🎯 Pontuação carregada:", score);
 
         if (score <= 50) {
           setFaixa("Baixa probabilidade");
@@ -96,7 +112,7 @@ export default function Resultado() {
 
         setLoading(false);
       } catch (err) {
-        console.error("Erro geral em resultado-final:", err);
+        console.error("💥 Erro geral no resultado-final:", err);
         setErro("Ocorreu um erro ao carregar os dados.");
         setLoading(false);
       }
@@ -105,7 +121,8 @@ export default function Resultado() {
     fetchResultado();
   }, []);
 
-  // 🌀 LOADING
+  console.log("🎨 Renderizando tela: loading?", loading, "erro?", erro, "pontuação:", pontuacao);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
@@ -115,7 +132,6 @@ export default function Resultado() {
     );
   }
 
-  // ⚠️ ERRO
   if (erro) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
@@ -127,7 +143,7 @@ export default function Resultado() {
     );
   }
 
-  // ✅ RESULTADO
+  // Exibe resultado
   const posicao =
     total > 0 && pontuacao !== null
       ? `${Math.min((pontuacao / total) * 100, 100)}%`
@@ -163,9 +179,7 @@ export default function Resultado() {
           transition={{ duration: 1 }}
           className="mt-10 bg-[#111] p-5 rounded-xl"
         >
-          <h3 className="text-[#ffb347] font-bold mb-4 text-center">
-           📊 Faixas de Interpretação
-          </h3>
+          <h3 className="text-[#ffb347] font-bold mb-4 text-center">  Faixas de Interpretação</h3>
 
           <div className="relative w-full h-4 rounded-full overflow-hidden mb-8 flex">
             <div className="flex-1 bg-[#1db954]" />
@@ -174,80 +188,13 @@ export default function Resultado() {
 
             <div
               className="absolute top-1/2 -translate-y-1/2"
-              style={{
-                left: posicao,
-                transform: "translate(-50%, -50%)",
-              }}
+              style={{ left: posicao, transform: "translate(-50%, -50%)" }}
             >
               <div className="w-10 h-10 bg-[#ffffff] rounded-full flex items-center justify-center text-black font-bold shadow-lg border-2 border-[#0a0a0a]">
                 {pontuacao}
               </div>
             </div>
           </div>
-
-          <ul className="text-sm text-gray-300 space-y-2 mt-3">
-            <li>
-              <span className="text-[#1db954] font-semibold">0 a 50:</span> Baixa probabilidade — indica baixa tendência a sintomas de TDAH.
-            </li>
-            <li>
-              <span className="text-[#ffb347] font-semibold">51 a 100:</span> Indícios moderados — alguns sinais podem estar presentes.
-            </li>
-            <li>
-              <span className="text-[#ff4c4c] font-semibold">101 a 150:</span> Alta probabilidade — indica sinais significativos de TDAH.
-            </li>
-          </ul>
-        </motion.div>
-
-        {/* E-books */}
-        <motion.div
-          className="mt-12 p-6 bg-gray-50 rounded-2xl shadow-md text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-           🎁 Seus E-books Exclusivos
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Clique abaixo para baixar gratuitamente seus materiais de apoio:
-          </p>
-
-          <div className="flex flex-col md:flex-row justify-center gap-4">
-            <a
-              href="/ebooks/Explicando-o-TDAH.pdf"
-              download
-              className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow hover:bg-blue-700 transition"
-            >
-             📘 Baixar E-book – Explicando o TDAH
-            </a>
-
-            <a
-              href="/ebooks/Como-o-TDAH-Afeta-Relacionamentos.pdf"
-              download
-              className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-xl shadow hover:bg-purple-700 transition"
-            >
-             ❤️ Baixar E-book – Como o TDAH Afeta Relacionamentos
-            </a>
-          </div>
-        </motion.div>
-
-        {/* Rodapé */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-10 bg-gradient-to-r from-[#ffb347] to-[#ffcc70] text-black font-semibold p-6 rounded-xl shadow-lg"
-        >
-          <p>
-            Lembre-se: este teste é apenas uma triagem inicial baseada em critérios da OMS.
-            Somente um profissional qualificado pode oferecer um diagnóstico preciso.
-          </p>
-          <Link
-            href="/"
-            className="mt-4 inline-block bg-[#1a1a1a] text-[#ffb347] px-6 py-2 rounded-lg font-bold hover:bg-[#333] transition"
-          >
-            Refazer o Teste
-          </Link>
         </motion.div>
       </motion.div>
     </div>
