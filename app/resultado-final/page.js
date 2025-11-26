@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { motion } from "framer-motion";
@@ -29,15 +28,15 @@ export default function Resultado() {
           return;
         }
 
-        // 🔹 Buscar pagamento confirmado
+        //  Buscar pagamento confirmado (id OU mp_payment_id)
         const { data: pagamento, error: pagamentoError } = await supabase
           .from("payments")
-          .select("mp_payment_id, status, metadata")
-          .eq("id", ref)
+          .select("id, mp_payment_id, status, metadata")
+          .or(`id.eq.${ref},mp_payment_id.eq.${ref}`)
           .single();
 
         if (pagamentoError || !pagamento) {
-          console.error(pagamentoError);
+          console.error("Erro ao buscar pagamento:", pagamentoError);
           setErro("Pagamento não encontrado ou inválido.");
           setLoading(false);
           return;
@@ -45,7 +44,7 @@ export default function Resultado() {
 
         console.log("📊 Status do pagamento na página final:", pagamento.status);
 
-        // 🔁 Ajuste: caso o status ainda não tenha propagado, recarrega após 3s
+        // 🔁 Se ainda não foi aprovado, tentar novamente
         if (pagamento.status !== "approved") {
           console.log("⏳ Pagamento ainda pendente, tentando novamente em 3 segundos...");
           setTimeout(() => {
@@ -54,7 +53,23 @@ export default function Resultado() {
           return;
         }
 
-        const email = pagamento.metadata?.email;
+        // 🔹 Recuperar e-mail de metadata, se existir
+        let email = pagamento.metadata?.email;
+
+        // 🔸 Fallback: tentar buscar o e-mail via tabela de resultados
+        if (!email) {
+          console.log("⚠️ E-mail não encontrado em metadata. Buscando por ref...");
+          const { data: resBackup, error: backupError } = await supabase
+            .from("resultados_teste")
+            .select("email")
+            .eq("ref_pagamento", ref)
+            .single();
+
+          if (!backupError && resBackup?.email) {
+            email = resBackup.email;
+          }
+        }
+
         if (!email) {
           setErro("Não foi possível identificar o e-mail do teste.");
           setLoading(false);
@@ -105,7 +120,7 @@ export default function Resultado() {
 
         setLoading(false);
       } catch (err) {
-        console.error(err);
+        console.error("Erro geral em resultado-final:", err);
         setErro("Ocorreu um erro ao carregar os dados.");
         setLoading(false);
       }
@@ -173,7 +188,7 @@ export default function Resultado() {
           className="mt-10 bg-[#111] p-5 rounded-xl"
         >
           <h3 className="text-[#ffb347] font-bold mb-4 text-center">
-            📊 Faixas de Interpretação
+             Faixas de Interpretação
           </h3>
 
           <div className="relative w-full h-4 rounded-full overflow-hidden mb-8 flex">
@@ -215,7 +230,7 @@ export default function Resultado() {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            🎁 Seus E-books Exclusivos
+           🎁 Seus E-books Exclusivos
           </h2>
           <p className="text-gray-600 mb-6">
             Clique abaixo para baixar gratuitamente seus materiais de apoio:
@@ -227,7 +242,7 @@ export default function Resultado() {
               download
               className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow hover:bg-blue-700 transition"
             >
-              📘 Baixar E-book – Explicando o TDAH
+             📘 Baixar E-book – Explicando o TDAH
             </a>
 
             <a
@@ -235,7 +250,7 @@ export default function Resultado() {
               download
               className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-xl shadow hover:bg-purple-700 transition"
             >
-              ❤️ Baixar E-book – Como o TDAH Afeta Relacionamentos
+             ❤️ Baixar E-book – Como o TDAH Afeta Relacionamentos
             </a>
           </div>
         </motion.div>
