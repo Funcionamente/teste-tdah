@@ -16,7 +16,7 @@ export async function GET(req) {
       );
     }
 
-    // 🔍 Consulta por ref OU mp_payment_id
+    // 🔍 Consulta tanto pelo id (ref_...) quanto pelo mp_payment_id
     const query = `${SUPABASE_URL}/rest/v1/payments?or=(id.eq.${encodeURIComponent(
       ref
     )},mp_payment_id.eq.${encodeURIComponent(ref)})`;
@@ -40,12 +40,11 @@ export async function GET(req) {
 
     const rows = await res.json();
     const payment = Array.isArray(rows) ? rows[0] : rows;
-    const status = payment?.status ?? null;
+    const status = payment?.status ?? "unknown";
 
-    // ✅ Retorna status padronizado
     return new Response(
       JSON.stringify({
-        status: status || "unknown",
+        status,
         mp_payment_id: payment?.mp_payment_id ?? null,
       }),
       {
