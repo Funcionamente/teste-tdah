@@ -28,10 +28,10 @@ export default function Resultado() {
           return;
         }
 
-        //  Buscar pagamento confirmado (id OU mp_payment_id)
+        // 🔹 Buscar pagamento confirmado (por id ou mp_payment_id)
         const { data: pagamento, error: pagamentoError } = await supabase
           .from("payments")
-          .select("id, mp_payment_id, status, metadata")
+          .select("id, mp_payment_id, status")
           .or(`id.eq.${ref},mp_payment_id.eq.${ref}`)
           .single();
 
@@ -44,7 +44,6 @@ export default function Resultado() {
 
         console.log("📊 Status do pagamento na página final:", pagamento.status);
 
-        // 🔁 Se ainda não foi aprovado, tentar novamente
         if (pagamento.status !== "approved") {
           console.log("⏳ Pagamento ainda pendente, tentando novamente em 3 segundos...");
           setTimeout(() => {
@@ -53,41 +52,18 @@ export default function Resultado() {
           return;
         }
 
-        // 🔹 Recuperar e-mail de metadata, se existir
-        let email = pagamento.metadata?.email;
-
-        // 🔸 Fallback: tentar buscar o e-mail via tabela de resultados
-        if (!email) {
-          console.log("⚠️ E-mail não encontrado em metadata. Buscando por ref...");
-          const { data: resBackup, error: backupError } = await supabase
-            .from("resultados_teste")
-            .select("email")
-            .eq("ref_pagamento", ref)
-            .single();
-
-          if (!backupError && resBackup?.email) {
-            email = resBackup.email;
-          }
-        }
-
-        if (!email) {
-          setErro("Não foi possível identificar o e-mail do teste.");
-          setLoading(false);
-          return;
-        }
-
-        // 🔹 Buscar resultado do teste pelo e-mail
+        // 🔹 Buscar resultado do teste pelo ref_pagamento (sem email)
         const { data: resultado, error: resultadoError } = await supabase
           .from("resultados_teste")
           .select("*")
-          .eq("email", email)
+          .or(`ref_pagamento.eq.${ref},mp_payment_id.eq.${ref}`)
           .order("criado_em", { ascending: false })
           .limit(1)
           .single();
 
         if (resultadoError || !resultado) {
-          console.error(resultadoError);
-          setErro("Resultado do teste não encontrado.");
+          console.error("❌ Resultado do teste não encontrado:", resultadoError);
+          setErro("Resultado do teste não encontrado para este pagamento.");
           setLoading(false);
           return;
         }
@@ -188,7 +164,7 @@ export default function Resultado() {
           className="mt-10 bg-[#111] p-5 rounded-xl"
         >
           <h3 className="text-[#ffb347] font-bold mb-4 text-center">
-             Faixas de Interpretação
+           📊 Faixas de Interpretação
           </h3>
 
           <div className="relative w-full h-4 rounded-full overflow-hidden mb-8 flex">
