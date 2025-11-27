@@ -61,7 +61,7 @@ export default function ResultadoFinal() {
         const { data: resultado, error: resultadoError } = await supabase
           .from("resultados_teste")
           .select("*")
-          .eq("payment_ref", ref)
+          .eq("id_pagamento", ref)
           .order("criado_em", { ascending: false })
           .limit(1)
           .single();
