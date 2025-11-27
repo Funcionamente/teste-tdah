@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "fra​mer-motion";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
 export default function CheckoutPage() {
@@ -9,16 +9,6 @@ export default function CheckoutPage() {
   const [referenceId, setReferenceId] = useState(null);
   const [retryTimeout, setRetryTimeout] = useState(null);
 
-  // 🆕 Captura o ref vindo da URL (gerado no teste/page.js)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const refFromURL = params.get("ref");
-    if (refFromURL) {
-      console.log("🔗 Referência recebida:", refFromURL);
-      setReferenceId(refFromURL);
-    }
-  }, []);
-
   // 🔧 Função principal de pagamento
   const handlePayment = async () => {
     setLoading(true);
@@ -26,8 +16,7 @@ export default function CheckoutPage() {
     setPaymentApproved(false);
 
     try {
-      // 🔹 Usa o ref já existente (não gera um novo)
-      const ref = referenceId || "ref_" + Date.now();
+      const ref = "ref_" + Date.now();
       setReferenceId(ref);
 
       const response = await fetch("/api/create-preference", {
@@ -172,7 +161,7 @@ export default function CheckoutPage() {
 
               <div className="mt-8 flex items-center justify-center space-x-2 text-gray-300 text-sm">
                 <div className="w-5 h-5">
-                  <svg xmlns="http://.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5 text-green-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5 text-green-400">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V7.5a4.5 4.5 0 00-9 0v3m10.5 0a1.5 1.5 0 011.5 1.5v6a1.5 1.5 0 01-1.5 1.5h-12a1.5 1.5 0 01-1.5-1.5v-6a1.5 1.5 0 011.5-1.5m10.5 0h-10.5" />
                   </svg>
                 </div>
