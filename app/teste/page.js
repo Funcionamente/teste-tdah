@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/s​upabaseClient";
 import FaixaDestaque from "@/components/FaixaDestaque";
 
 const perguntas = [
@@ -49,8 +50,10 @@ export default function TesteTDAH() {
   const [indice, setIndice] = useState(0);
   const [respostas, setRespostas] = useState(Array(perguntas.length).fill(null));
   const [concluido, setConcluido] = useState(false);
+  const [salvando, setSalvando] = useState(false);
 
   const progresso = ((indice + 1) / perguntas.length) * 100;
+  const pontuacaoTotal = respostas.reduce((acc, val) => acc + (val ?? 0), 0);
 
   const handleResposta = (valor) => {
     const novas = [...respostas];
@@ -70,7 +73,41 @@ export default function TesteTDAH() {
     if (indice > 0) setIndice(indice - 1);
   };
 
-  const pontuacaoTotal = respostas.reduce((acc, val) => acc + (val ?? 0), 0);
+  const handleFinalizar = async () => {
+    try {
+      setSalvando(true);
+
+      // 🔹 Gerar referência única (usada depois no pagamento)
+      const referenceId = `ref_${Date.now()}`;
+
+      // 🔹 Salvar resultado parcial no Supabase
+      const { error } = await supabase.from("resultados_teste").insert([
+        {
+          ref: referenceId,
+          pontuacao: pontuacaoTotal,
+          status: "pending",
+          criado_em: new Date().toISOString(),
+        },
+      ]);
+
+      if (error) {
+        console.error("Erro ao salvar resultado:", error);
+        alert("Não foi possível salvar seu resultado. Tente novamente.");
+        setSalvando(false);
+        return;
+      }
+
+      console.log("✅ Resultado salvo com sucesso:", referenceId);
+
+      // 🔹 Redirecionar para o checkout com a referência
+      window.location.href = `/checkout?ref=${referenceId}`;
+    } catch (err) {
+      console.error("Erro inesperado:", err);
+      alert("Erro inesperado. Tente novamente.");
+    } finally {
+      setSalvando(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-neutral-950 text-white">
@@ -156,13 +193,18 @@ export default function TesteTDAH() {
               Clique abaixo para acessar o resultado completo e receber os seus 2 e-books gratuitos.
             </p>
             <button
-              className="px-8 py-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-black rounded-full font-semibold hover:opacity-90 transition-all"
-              onClick={() => (window.location.href = "/checkout")}
+              disabled={salvando}
+              onClick={handleFinalizar}
+              className={`px-8 py-4 rounded-full font-semibold text-black transition-all ${
+                salvando
+                  ? "bg-neutral-600 cursor-not-allowed"
+                  : "bg-gradient-to-r from-amber-400 to-yellow-500 hover:opacity-90"
+              }`}
             >
-              Ver Resultado
+              {salvando ? "Salvando..." : "Ver Resultado"}
             </button>
 
-               <p className="mt-8 text-sm text-neutral-400">
+            <p className="mt-8 text-sm text-neutral-400">
               Sua pontuação total: {pontuacaoTotal} pontos
             </p>
           </motion.div>
