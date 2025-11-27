@@ -2,9 +2,9 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";​
 import Link from "next/link";
 
 export default function ResultadoFinal() {
@@ -19,6 +19,7 @@ export default function ResultadoFinal() {
 
   useEffect(() => {
     console.log("🚀 Página resultado-final montada");
+
     async function fetchResultado() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -30,6 +31,19 @@ export default function ResultadoFinal() {
           setLoading(false);
           return;
         }
+
+        // ✅ Criar o Supabase client dentro do client-side
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseAnonKey) {
+          console.error("❌ Variáveis NEXT_PUBLIC_SUPABASE_URL/ANON_KEY ausentes!");
+          setErro("Erro de configuração do servidor.");
+          setLoading(false);
+          return;
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
         // Buscar pagamento
         console.log("💾 Buscando pagamento no Supabase...");
@@ -121,8 +135,6 @@ export default function ResultadoFinal() {
     fetchResultado();
   }, []);
 
-  console.log("🎨 Renderizando tela: loading?", loading, "erro?", erro, "pontuação:", pontuacao);
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
@@ -143,7 +155,6 @@ export default function ResultadoFinal() {
     );
   }
 
-  // Exibe resultado
   const posicao =
     total > 0 && pontuacao !== null
       ? `${Math.min((pontuacao / total) * 100, 100)}%`
@@ -171,31 +182,6 @@ export default function ResultadoFinal() {
         <div className="bg-[#ffb347]/20 border border-[#ffb347] p-4 rounded-lg text-[#ffb347] font-semibold mb-6">
           <p>{proximoPasso}</p>
         </div>
-
-        {/* Barra de faixas */}
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: "100%" }}
-          transition={{ duration: 1 }}
-          className="mt-10 bg-[#111] p-5 rounded-xl"
-        >
-          <h3 className="text-[#ffb347] font-bold mb-4 text-center">  Faixas de Interpretação</h3>
-
-          <div className="relative w-full h-4 rounded-full overflow-hidden mb-8 flex">
-            <div className="flex-1 bg-[#1db954]" />
-            <div className="flex-1 bg-[#ffb347]" />
-            <div className="flex-1 bg-[#ff4c4c]" />
-
-            <div
-              className="absolute top-1/2 -translate-y-1/2"
-              style={{ left: posicao, transform: "translate(-50%, -50%)" }}
-            >
-              <div className="w-10 h-10 bg-[#ffffff] rounded-full flex items-center justify-center text-black font-bold shadow-lg border-2 border-[#0a0a0a]">
-                {pontuacao}
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </motion.div>
     </div>
   );
