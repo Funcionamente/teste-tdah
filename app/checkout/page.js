@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-​
+
 
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
