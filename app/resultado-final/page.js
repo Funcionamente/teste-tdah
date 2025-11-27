@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
-import { CheckCircle2 } from "lucide-react";​
+import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 export default function ResultadoFinal() {
