@@ -77,16 +77,22 @@ export default function TesteTDAH() {
   const handleSalvarResultado = async (pontuacaoTotal) => {
     try {
       const refPagamento = "ref_" + Date.now();
+      const resultadoData = {
+        pontuacao: Number(pontuacaoTotal) || 0,
+        interpretacao: null,
+        id_pagamento: refPagamento,
+        status_pagamento: "pendente",
+        resultado_exibido: false,
+      };
 
-      const { data, error } = await supabase.from("resultados_teste").insert([
-        {
-          pontuacao: Number(pontuacaoTotal) || 0,
-          interpretacao: null,
-          id_pagamento: refPagamento,
-          status_pagamento: "pending",
-          resultado_exibido: false,
-        },
-      ]);
+      let { data, error } = await supabase.from("resultados_teste").insert([resultadoData]);
+
+      // 🔁 Se der erro na constraint, tenta com o status "pending"
+      if (error && error.message?.includes("status_pagamento_check")) {
+        console.warn("⚠️ Valor 'pendente' não aceito, tentando 'pending'...");
+        resultadoData.status_pagamento = "pending";
+        ({ data, error } = await supabase.from("resultados_teste").insert([resultadoData]));
+      }
 
       if (error) {
         console.error("Erro ao salvar resultado:", error);
