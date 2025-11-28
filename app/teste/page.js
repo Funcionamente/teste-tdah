@@ -81,7 +81,7 @@ export default function TesteTDAH() {
 
       const { data, error } = await supabase.from("resultados_teste").insert([
         {
-          pontuacao: pontuacaoTotal,
+          pontuacao: Number(pontuacaoTotal) || 0,
           interpretacao: null,
           id_pagamento: refPagamento,
           status_pagamento: "pendente",
