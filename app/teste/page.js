@@ -77,6 +77,24 @@ export default function TesteTDAH() {
   const handleSalvarResultado = async (pontuacaoTotal) => {
     try {
       const refPagamento = "ref_" + Date.now();
+
+      // 🧾 1️⃣ Cria um registro na tabela payments
+      const { error: paymentError } = await supabase.from("payments").insert([
+        {
+          id: refPagamento,
+          title: "Resultado completo + 2 eBooks exclusivos",
+          price: 4.99,
+          status: "pending",
+        },
+      ]);
+
+      if (paymentError) {
+        console.error("❌ Erro ao criar registro em payments:", paymentError);
+        alert("Erro ao salvar seu resultado. Tente novamente.");
+        return;
+      }
+
+      // 🧠 2️⃣ Depois, cria o resultado do teste vinculado ao pagamento
       const resultadoData = {
         pontuacao: Number(pontuacaoTotal) || 0,
         interpretacao: null,
@@ -87,7 +105,7 @@ export default function TesteTDAH() {
 
       let { data, error } = await supabase.from("resultados_teste").insert([resultadoData]);
 
-      // 🔁 Se der erro na constraint, tenta com o status "pending"
+      // 🔁 Se o banco não aceitar 'pendente', tenta com 'pending'
       if (error && error.message?.includes("status_pagamento_check")) {
         console.warn("⚠️ Valor 'pendente' não aceito, tentando 'pending'...");
         resultadoData.status_pagamento = "pending";
