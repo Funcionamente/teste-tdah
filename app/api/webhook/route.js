@@ -1,6 +1,6 @@
 export async function POST(req) {
   const now = new Date().toISOString();
-  const log = (...args) => console.log(now, ...args);
+  const log = (...args) => console.log(n​ow, ...args);
   const error = (...args) => console.error(now, ...args);
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -78,29 +78,65 @@ export async function POST(req) {
       log("✅ Tabela payments atualizada com sucesso:", externalRef);
     }
 
-    // ✅ UPSERT na tabela resultados_teste
-    const supaResult = await fetch(`${SUPABASE_URL}/rest/v1/resultados_teste`, {
-      method: "POST",
+    // ✅ Atualiza resultado existente, preservando pontuação
+    const resultUrl = `${SUPABASE_URL}/rest/v1/resultados_teste?id_pagamento=eq.${externalRef}`;
+
+    // 🔎 Verifica se já existe um resultado
+    const checkRes = await fetch(resultUrl, {
       headers: {
-        "Content-Type": "application/json",
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
-        Prefer: "resolution=merge-duplicates",
       },
-      body: JSON.stringify({
-        id_pagamento: externalRef,
-        status_pagamento: payment.status,
-      }),
     });
+    const existingResults = await checkRes.json();
 
-    if (!supaResult.ok) {
-      const txt = await supaResult.text().catch(() => "(sem corpo)");
-      error("⚠️ Falha ao inserir/atualizar tabela resultados_teste:", txt);
+    if (Array.isArray(existingResults) && existingResults.length > 0) {
+      // 🔄 Atualiza o status mantendo a pontuação existente
+      const patchRes = await fetch(resultUrl, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+        body: JSON.stringify({
+          status_pagamento: payment.status,
+          resultado_exibido: payment.status === "approved" ? false : existingResults[0].resultado_exibido,
+        }),
+      });
+
+      if (patchRes.ok) {
+        log(`✅ Tabela resultados_teste atualizada para: ${payment.status}`);
+      } else {
+        const txt = await patchRes.text().catch(() => "(sem corpo)");
+        error("⚠️ Falha ao atualizar resultados_teste:", txt);
+      }
     } else {
-      log("✅ Tabela resultados_teste atualizada para:", payment.status);
+      // 🆕 Se não existir, cria novo registro
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/resultados_teste`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+        body: JSON.stringify({
+          id_pagamento: externalRef,
+          status_pagamento: payment.status,
+          pontuacao: 0,
+          resultado_exibido: false,
+        }),
+      });
+
+      if (insertRes.ok) {
+        log(`🆕 Novo registro criado em resultados_teste: ${externalRef}`);
+      } else {
+        const txt = await insertRes.text().catch(() => "(sem corpo)");
+        error("⚠️ Falha ao criar novo registro em resultados_teste:", txt);
+      }
     }
 
-    // 🚀 Adicionado: Se pagamento foi aprovado, chama o redirect-user
+    // 🚀 Redireciona automaticamente se aprovado
     if (payment.status === "approved" && BASE_URL) {
       log("🚀 Pagamento aprovado! Chamando redirect-user...");
       fetch(`${BASE_URL}/api/redirect-user?ref=${externalRef}`)
