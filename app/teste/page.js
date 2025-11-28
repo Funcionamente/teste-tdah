@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supab​aseClient";
+import { supabase } from "@/lib/supabaseClient";
 import FaixaDestaque from "@/components/FaixaDestaque";
 
 const perguntas = [
