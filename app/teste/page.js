@@ -83,7 +83,7 @@ export default function TesteTDAH() {
           pontuacao: Number(pontuacaoTotal) || 0,
           interpretacao: null,
           id_pagamento: refPagamento,
-          status_pagamento: "pendente",
+          status_pagamento: "pending",
           resultado_exibido: false,
         },
       ]);
