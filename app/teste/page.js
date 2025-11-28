@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supab​aseClient";
 import FaixaDestaque from "@/components/FaixaDestaque";
 
 const perguntas = [
@@ -78,13 +78,14 @@ export default function TesteTDAH() {
     try {
       const refPagamento = "ref_" + Date.now();
 
-      // 🧾 1️⃣ Cria um registro na tabela payments
+      // 🧾 1️⃣ Cria o registro na tabela payments conforme estrutura real
       const { error: paymentError } = await supabase.from("payments").insert([
         {
           id: refPagamento,
-          title: "Resultado completo + 2 eBooks exclusivos",
-          price: 4.99,
+          score: Number(pontuacaoTotal) || 0,
           status: "pending",
+          mp_payment_id: null,
+          metadata: { origem: "teste" },
         },
       ]);
 
@@ -94,7 +95,7 @@ export default function TesteTDAH() {
         return;
       }
 
-      // 🧠 2️⃣ Depois, cria o resultado do teste vinculado ao pagamento
+      // 🧠 2️⃣ Cria o resultado do teste vinculado ao pagamento
       const resultadoData = {
         pontuacao: Number(pontuacaoTotal) || 0,
         interpretacao: null,
@@ -103,14 +104,7 @@ export default function TesteTDAH() {
         resultado_exibido: false,
       };
 
-      let { data, error } = await supabase.from("resultados_teste").insert([resultadoData]);
-
-      // 🔁 Se o banco não aceitar 'pendente', tenta com 'pending'
-      if (error && error.message?.includes("status_pagamento_check")) {
-        console.warn("⚠️ Valor 'pendente' não aceito, tentando 'pending'...");
-        resultadoData.status_pagamento = "pending";
-        ({ data, error } = await supabase.from("resultados_teste").insert([resultadoData]));
-      }
+      const { data, error } = await supabase.from("resultados_teste").insert([resultadoData]);
 
       if (error) {
         console.error("Erro ao salvar resultado:", error);
