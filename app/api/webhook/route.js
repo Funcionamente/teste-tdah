@@ -1,6 +1,6 @@
 export async function POST(req) {
   const now = new Date().toISOString();
-  const log = (...args) => console.log(n​ow, ...args);
+  const log = (...args) => console.log(now, ...args);
   const error = (...args) => console.error(now, ...args);
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
