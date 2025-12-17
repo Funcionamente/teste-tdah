@@ -211,7 +211,7 @@ export default function TesteTDAH() {
             </button>
 
             <p className="mt-8 text-sm text-neutral-400">
-              Sua pontuação total: {pontuacaoTotal} pontos
+             // Sua pontuação total: {pontuacaoTotal} pontos
             </p>
           </motion.div>
         )}
