@@ -79,7 +79,7 @@ export default function TesteTDAH() {
       const refPagamento = "ref_" + Date.now();
 
       // 🧾 1️⃣ Cria registro em payments
-      const { error: paymentError } = await supabase.from("payments").insert([
+      const { data: paymentDataInserted, error: paymentError } = await supabase.from("payments").insert([
         {
           id: refPagamento,
           score: Number(pontuacaoTotal) || 0,
@@ -87,10 +87,10 @@ export default function TesteTDAH() {
           mp_payment_id: null,
           metadata: { origem: "teste" },
         },
-      ]);
+      ]).select();
 
       if (paymentError) {
-        console.error("❌ Erro ao criar registro em payments:", paymentError);
+        console.error("❌ ERRO REAL payments:", JSON.stringify(paymentError, null, 2));
         alert("Erro ao salvar seu resultado. Tente novamente.");
         return;
       }
@@ -111,7 +111,7 @@ export default function TesteTDAH() {
         });
 
       if (error) {
-        console.error("Erro ao salvar resultado:", error);
+        console.error("❌ ERRO REAL resultados_teste:", JSON.stringify(error, null, 2));
         alert("Não foi possível salvar seu resultado. Tente novamente.");
         return;
       }
