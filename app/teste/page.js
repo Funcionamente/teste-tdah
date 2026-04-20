@@ -78,7 +78,7 @@ export default function TesteTDAH() {
     try {
       const refPagamento = "ref_" + Date.now();
 
-      // 🧾 1️⃣ Cria o registro na tabela payments conforme estrutura real
+      // 🧾 1️⃣ Cria registro em payments
       const { error: paymentError } = await supabase.from("payments").insert([
         {
           id: refPagamento,
@@ -95,7 +95,7 @@ export default function TesteTDAH() {
         return;
       }
 
-      // 🧠 2️⃣ Cria o resultado do teste vinculado ao pagamento
+      // 🧠 2️⃣ UPSERT do resultado (🔥 AJUSTE AQUI)
       const resultadoData = {
         pontuacao: Number(pontuacaoTotal) || 0,
         interpretacao: null,
@@ -104,7 +104,11 @@ export default function TesteTDAH() {
         resultado_exibido: false,
       };
 
-      const { data, error } = await supabase.from("resultados_teste").insert([resultadoData]);
+      const { data, error } = await supabase
+        .from("resultados_teste")
+        .upsert([resultadoData], {
+          onConflict: "id_pagamento",
+        });
 
       if (error) {
         console.error("Erro ao salvar resultado:", error);
@@ -113,6 +117,11 @@ export default function TesteTDAH() {
       }
 
       console.log("✅ Resultado salvo com sucesso:", data);
+
+      // 🔥 Segurança extra para iPhone (mantém fallback local)
+      localStorage.setItem("tdah_ref", refPagamento);
+      localStorage.setItem("tdah_score", String(pontuacaoTotal));
+
       window.location.href = `/checkout?ref=${refPagamento}`;
     } catch (err) {
       console.error("Erro inesperado ao salvar resultado:", err);
@@ -122,7 +131,6 @@ export default function TesteTDAH() {
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-neutral-950 text-white">
-      {/* Barra de Progresso */}
       <div className="h-2 bg-neutral-800 w-full">
         <motion.div
           className="h-2 bg-gradient-to-r from-amber-400 to-yellow-500"
@@ -132,14 +140,12 @@ export default function TesteTDAH() {
         />
       </div>
 
-      {/* Título */}
       <div className="text-center mt-10">
         <h1 className="text-3xl md:text-4xl font-semibold text-amber-400">
           Teste Interativo TDAH
         </h1>
       </div>
 
-      {/* Conteúdo Principal */}
       <div className="flex-grow flex flex-col justify-center items-center px-6">
         {!concluido ? (
           <motion.div
@@ -209,15 +215,10 @@ export default function TesteTDAH() {
             >
               Ver Resultado
             </button>
-
-            {/* <p className="mt-8 text-sm text-neutral-400">
-              Sua pontuação total: {pontuacaoTotal} pontos
-            </p> */}
           </motion.div>
         )}
       </div>
 
-      {/* Faixa de destaque final */}
       <FaixaDestaque />
     </div>
   );
