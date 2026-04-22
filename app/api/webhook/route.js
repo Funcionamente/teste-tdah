@@ -88,7 +88,25 @@ export async function POST(req) {
         Authorization: `Bearer ${SUPABASE_KEY}`,
       },
     });
-    const existingResults = await checkRes.json();
+    let existingResults = [];
+
+    for (let i = 0; i < 5; i++) {
+      const retryRes = await fetch(resultUrl, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      });
+    
+      existingResults = await retryRes.json();
+    
+      if (Array.isArray(existingResults) && existingResults.length > 0) {
+        break;
+      }
+    
+      // aguarda 500ms antes de tentar de novo
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
 
     if (Array.isArray(existingResults) && existingResults.length > 0) {
       // 🔄 Atualiza SOMENTE o status (NÃO mexe na pontuação)
