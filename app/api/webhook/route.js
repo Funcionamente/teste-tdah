@@ -111,30 +111,29 @@ export async function POST(req) {
         const txt = await patchRes.text().catch(() => "(sem corpo)");
         error("⚠️ Falha ao atualizar resultados_teste:", txt);
       }
-    } else {
-      // 🆕 Se não existir, cria novo registro
-      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/resultados_teste`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-        body: JSON.stringify({
-          id_pagamento: externalRef,
-          status_pagamento: payment.status,
-          pontuacao: 0,
-          resultado_exibido: false,
-        }),
-      });
-
-      if (insertRes.ok) {
-        log(`🆕 Novo registro criado em resultados_teste: ${externalRef}`);
+      if (Array.isArray(existingResults) && existingResults.length > 0) {
+        // 🔄 Atualiza SEM sobrescrever pontuação
+        const patchRes = await fetch(resultUrl, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+          },
+          body: JSON.stringify({
+            status_pagamento: payment.status,
+          }),
+        });
+      
+        if (patchRes.ok) {
+          log(`✅ Tabela resultados_teste atualizada para: ${payment.status}`);
+        } else {
+          const txt = await patchRes.text().catch(() => "(sem corpo)");
+          error("⚠️ Falha ao atualizar resultados_teste:", txt);
+        }
       } else {
-        const txt = await insertRes.text().catch(() => "(sem corpo)");
-        error("⚠️ Falha ao criar novo registro em resultados_teste:", txt);
+        error(`⚠️ Resultado NÃO encontrado para ${externalRef} — isso não deveria acontecer`);
       }
-    }
 
     // 🚀 Redireciona automaticamente se aprovado
     if (payment.status === "approved" && BASE_URL) {
