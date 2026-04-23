@@ -66,7 +66,7 @@ export async function POST(req) {
         "Content-Type": "application/json",
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
-        Prefer: "resolution=merge-duplicates",
+        Prefer: "resolution=merge-duplicates,on_conflict=id",
       },
       body: JSON.stringify(paymentData),
     });
