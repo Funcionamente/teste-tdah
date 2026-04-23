@@ -81,16 +81,9 @@ export async function POST(req) {
     // ✅ Atualiza resultado existente, preservando pontuação
     const resultUrl = `${SUPABASE_URL}/rest/v1/resultados_teste?id_pagamento=eq.${externalRef}`;
 
-    // 🔎 Verifica se já existe um resultado
-    const checkRes = await fetch(resultUrl, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-      },
-    });
     let existingResults = [];
-
-    for (let i = 0; i < 5; i++) {
+    
+    for (let i = 0; i < 8; i++) {
       const retryRes = await fetch(resultUrl, {
         headers: {
           apikey: SUPABASE_KEY,
@@ -101,11 +94,14 @@ export async function POST(req) {
       existingResults = await retryRes.json();
     
       if (Array.isArray(existingResults) && existingResults.length > 0) {
+        log(`✅ Resultado encontrado na tentativa ${i + 1}`);
         break;
       }
     
-      // aguarda 500ms antes de tentar de novo
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      log(`⏳ Resultado ainda não encontrado (tentativa ${i + 1})...`);
+    
+      // ⏱️ espera 1 segundo (mais seguro que 500ms)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     if (Array.isArray(existingResults) && existingResults.length > 0) {
