@@ -78,24 +78,7 @@ export default function TesteTDAH() {
     try {
       const refPagamento = "ref_" + Date.now();
 
-      // 🧾 1️⃣ Cria registro em payments
-      const { data: paymentDataInserted, error: paymentError } = await supabase.from("payments").insert([
-        {
-          id: refPagamento,
-          score: Number(pontuacaoTotal) || 0,
-          status: "pending",
-          mp_payment_id: null,
-          metadata: { origem: "teste" },
-        },
-      ]).select();
-
-      if (paymentError) {
-        console.error("❌ ERRO REAL payments:", JSON.stringify(paymentError, null, 2));
-        alert("Erro ao salvar seu resultado. Tente novamente.");
-        return;
-      }
-
-      // 🧠 2️⃣ UPSERT do resultado (🔥 AJUSTE AQUI)
+      // ✅ PRIMEIRO salva resultado (ANTES do checkout)
       const resultadoData = {
         pontuacao: Number(pontuacaoTotal) || 0,
         interpretacao: null,
@@ -116,9 +99,31 @@ export default function TesteTDAH() {
         return;
       }
 
+      // ✅ DEPOIS cria registro em payments
+      const { error: paymentError } = await supabase.from("payments").upsert(
+        [
+          {
+            id: refPagamento,
+            score: Number(pontuacaoTotal) || 0,
+            status: "pending",
+            mp_payment_id: null,
+            metadata: { origem: "teste" },
+          },
+        ],
+        {
+          onConflict: "id",
+        }
+      );
+
+      if (paymentError) {
+        console.error("❌ ERRO REAL payments:", JSON.stringify(paymentError, null, 2));
+        alert("Erro ao salvar seu pagamento. Tente novamente.");
+        return;
+      }
+
       console.log("✅ Resultado salvo com sucesso:", data);
 
-      // 🔥 Segurança extra para iPhone (mantém fallback local)
+      // 🔥 Segurança extra para iPhone
       localStorage.setItem("tdah_ref", refPagamento);
       localStorage.setItem("tdah_score", String(pontuacaoTotal));
 
