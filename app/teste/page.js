@@ -73,69 +73,12 @@ export default function TesteTDAH() {
 
   const pontuacaoTotal = respostas.reduce((acc, val) => acc + (val ?? 0), 0);
 
+  // 🔹 Função para salvar o resultado no Supabase
   const handleSalvarResultado = async (pontuacaoTotal) => {
     try {
       const refPagamento = "ref_" + Date.now();
-  
-      // ✅ PRIMEIRO payments
-      const { error: paymentError } = await supabase
-        .from("payments")
-        .upsert(
-          [
-            {
-              id: refPagamento,
-              score: Number(pontuacaoTotal) || 0,
-              status: "pending",
-              mp_payment_id: null,
-              metadata: { origem: "teste" },
-            },
-          ],
-          {
-            onConflict: "id",
-          }
-        );
-  
-      if (paymentError) {
-        console.error("❌ ERRO REAL payments:", paymentError);
-        alert("Erro ao salvar pagamento.");
-        return;
-      }
-  
-      // ✅ DEPOIS resultado_teste
-      const { error } = await supabase
-        .from("resultados_teste")
-        .upsert(
-          [
-            {
-              pontuacao: Number(pontuacaoTotal) || 0,
-              interpretacao: null,
-              id_pagamento: refPagamento,
-              status_pagamento: "pending",
-              resultado_exibido: false,
-            },
-          ],
-          {
-            onConflict: "id_pagamento",
-          }
-        );
-  
-      if (error) {
-        console.error("❌ ERRO REAL resultados_teste:", error);
-        alert("Erro ao salvar resultado.");
-        return;
-      }
-  
-      localStorage.setItem("tdah_ref", refPagamento);
-      localStorage.setItem("tdah_score", String(pontuacaoTotal));
-  
-      window.location.href = `/checkout?ref=${refPagamento}`;
-    } catch (err) {
-      console.error(err);
-      alert("Erro inesperado.");
-    }
-  };
 
-      // ✅ DEPOIS cria registro em payments
+      // ✅ PRIMEIRO cria registro em payments (necessário por causa da foreign key)
       const { error: paymentError } = await supabase.from("payments").upsert(
         [
           {
@@ -154,6 +97,30 @@ export default function TesteTDAH() {
       if (paymentError) {
         console.error("❌ ERRO REAL payments:", JSON.stringify(paymentError, null, 2));
         alert("Erro ao salvar seu pagamento. Tente novamente.");
+        return;
+      }
+
+      // ⏳ Aguarda pequeno tempo para garantir persistência no banco
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // ✅ DEPOIS salva resultado
+      const resultadoData = {
+        pontuacao: Number(pontuacaoTotal) || 0,
+        interpretacao: null,
+        id_pagamento: refPagamento,
+        status_pagamento: "pending",
+        resultado_exibido: false,
+      };
+
+      const { data, error } = await supabase
+        .from("resultados_teste")
+        .upsert([resultadoData], {
+          onConflict: "id_pagamento",
+        });
+
+      if (error) {
+        console.error("❌ ERRO REAL resultados_teste:", JSON.stringify(error, null, 2));
+        alert("Não foi possível salvar seu resultado. Tente novamente.");
         return;
       }
 
