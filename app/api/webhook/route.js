@@ -6,7 +6,7 @@ export async function POST(req) {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL; // 🚀 Adicionado
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   try {
     const rawBody = await req.text();
@@ -50,9 +50,33 @@ export async function POST(req) {
       return new Response("ok", { status: 200 });
     }
 
-    // 🗂️ Monta os dados para salvar no Supabase
+    // 🔥 BUSCA score existente antes de atualizar
+    let existingScore = 0;
+
+    try {
+      const existingPaymentRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/payments?id=eq.${externalRef}&select=score`,
+        {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+          },
+        }
+      );
+
+      const existingPayment = await existingPaymentRes.json();
+
+      if (Array.isArray(existingPayment) && existingPayment.length > 0) {
+        existingScore = existingPayment[0]?.score ?? 0;
+      }
+    } catch (err) {
+      error("⚠️ Erro ao buscar score existente:", err);
+    }
+
+    // 🗂️ Monta os dados preservando score
     const paymentData = {
       id: externalRef,
+      score: existingScore, // 🔥 ESSENCIAL
       status: payment.status,
       mp_payment_id: payment.id,
       metadata: payment,
@@ -78,11 +102,11 @@ export async function POST(req) {
       log("✅ Tabela payments atualizada com sucesso:", externalRef);
     }
 
-    // ✅ Atualiza resultado existente, preservando pontuação
+    // 🔎 Busca resultado com retry
     const resultUrl = `${SUPABASE_URL}/rest/v1/resultados_teste?id_pagamento=eq.${externalRef}`;
 
     let existingResults = [];
-    
+
     for (let i = 0; i < 8; i++) {
       const retryRes = await fetch(resultUrl, {
         headers: {
@@ -90,22 +114,19 @@ export async function POST(req) {
           Authorization: `Bearer ${SUPABASE_KEY}`,
         },
       });
-    
+
       existingResults = await retryRes.json();
-    
+
       if (Array.isArray(existingResults) && existingResults.length > 0) {
         log(`✅ Resultado encontrado na tentativa ${i + 1}`);
         break;
       }
-    
+
       log(`⏳ Resultado ainda não encontrado (tentativa ${i + 1})...`);
-    
-      // ⏱️ espera 1 segundo (mais seguro que 500ms)
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     if (Array.isArray(existingResults) && existingResults.length > 0) {
-      // 🔄 Atualiza SOMENTE o status (NÃO mexe na pontuação)
       const patchRes = await fetch(resultUrl, {
         method: "PATCH",
         headers: {
@@ -125,11 +146,10 @@ export async function POST(req) {
         error("⚠️ Falha ao atualizar resultados_teste:", txt);
       }
     } else {
-      // ❌ NÃO CRIA MAIS REGISTRO AQUI
       error(`⚠️ Resultado NÃO encontrado para ${externalRef} — isso não deveria acontecer`);
     }
 
-    // 🚀 Redireciona automaticamente se aprovado
+    // 🚀 Redirecionamento automático
     if (payment.status === "approved" && BASE_URL) {
       log("🚀 Pagamento aprovado! Chamando redirect-user...");
       fetch(`${BASE_URL}/api/redirect-user?ref=${externalRef}`)
