@@ -9,17 +9,34 @@ export default function CheckoutPage() {
   const [referenceId, setReferenceId] = useState(null);
   const [retryTimeout, setRetryTimeout] = useState(null);
 
-  // 🔧 Função principal de pagamento (CORRIGIDA PARA IPHONE)
+  // 🔥 NOVO: pegar o ref da URL (VINDO DO TESTE)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+
+    if (ref) {
+      setReferenceId(ref);
+    } else {
+      console.error("❌ REF NÃO ENCONTRADO NA URL");
+      alert("Erro ao iniciar checkout. Ref não encontrado.");
+    }
+  }, []);
+
+  // 🔧 Função principal de pagamento (CORRIGIDA)
   const handlePayment = async () => {
+    if (!referenceId) {
+      alert("Erro: referência inválida.");
+      return;
+    }
+
     setLoading(true);
     setAwaitingPayment(false);
     setPaymentApproved(false);
 
     try {
-      const ref = "ref_" + Date.now();
-      setReferenceId(ref);
+      // ✅ NÃO CRIA MAIS REF NOVO
+      const ref = referenceId;
 
-      // ✅ SOLUÇÃO: abre a aba ANTES do fetch (iPhone não bloqueia)
       const paymentWindow = window.open("", "_blank");
 
       const response = await fetch("/api/create-preference", {
@@ -35,25 +52,27 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (data?.init_point && paymentWindow) {
-        // ✅ redireciona a aba já aberta
         paymentWindow.location.href = data.init_point;
 
-        // ✅ só ativa após garantir que abriu
         setAwaitingPayment(true);
         setLoading(false);
 
-        // ⏱️ Verifica o status do pagamento a cada 5 segundos
         const interval = setInterval(async () => {
           try {
             const res = await fetch(`/api/payment-status?ref=${ref}`);
             const result = await res.json();
+
             console.log("🔎 Status atual do pagamento:", result.status);
 
             if (result.status === "approved") {
               clearInterval(interval);
               localStorage.setItem("paymentSuccess", "true");
               setPaymentApproved(true);
-              if (paymentWindow && !paymentWindow.closed) paymentWindow.close();
+
+              if (paymentWindow && !paymentWindow.closed) {
+                paymentWindow.close();
+              }
+
               console.log("✅ Pagamento aprovado!");
 
               setTimeout(() => {
@@ -65,7 +84,6 @@ export default function CheckoutPage() {
           }
         }, 5000);
 
-        // 🧩 Detecta se o popup foi fechado antes de pagar
         const popupCheck = setInterval(async () => {
           if (paymentWindow.closed) {
             clearInterval(popupCheck);
@@ -74,6 +92,7 @@ export default function CheckoutPage() {
             try {
               const res = await fetch(`/api/payment-status?ref=${ref}`);
               const result = await res.json();
+
               if (result.status === "approved") {
                 clearInterval(interval);
                 localStorage.setItem("paymentSuccess", "true");
@@ -98,19 +117,19 @@ export default function CheckoutPage() {
     }
   };
 
-  // Limpa flags se o usuário recarregar
   useEffect(() => {
     localStorage.removeItem("paymentSuccess");
     if (retryTimeout) clearTimeout(retryTimeout);
   }, []);
 
-  // 🔁 Verifica status se o usuário recarregar a página enquanto aguardava
   useEffect(() => {
     if (!awaitingPayment || !referenceId) return;
+
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/payment-status?ref=${referenceId}`);
         const result = await res.json();
+
         if (result.status === "approved") {
           clearInterval(interval);
           setPaymentApproved(true);
@@ -121,6 +140,7 @@ export default function CheckoutPage() {
         console.error("Erro ao verificar status no reload:", err);
       }
     }, 5000);
+
     return () => clearInterval(interval);
   }, [awaitingPayment, referenceId]);
 
@@ -131,19 +151,13 @@ export default function CheckoutPage() {
           className="text-4xl md:text-5xl font-extrabold text-orange-400 tracking-tight"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
         >
           🧠 Acesse o seu resultado completo e receba os seus 2 e-books agora mesmo
         </motion.h1>
       </header>
 
-      <main className="flex flex-col items-center justify-center text-center px-6 md:px-0 flex-1">
-        <motion.div
-          className="max-w-2xl bg-white/10 backdrop-blur-md rounded-3xl p-10 shadow-2xl border border-white/10"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
+      <main className="flex flex-col items-center justify-center text-center px-6 flex-1">
+        <motion.div className="max-w-2xl bg-white/10 backdrop-blur-md rounded-3xl p-10 shadow-2xl border border-white/10">
           {!awaitingPayment ? (
             <>
               <h2 className="text-2xl font-semibold mb-4 text-orange-300">
@@ -152,21 +166,21 @@ export default function CheckoutPage() {
 
               <ul className="space-y-3 text-lg text-gray-200">
                 <li>✔️ Descobrir o seu nível de atenção e foco</li>
-                <li>✔️ Receber explicação detalhada do que o resultado significa</li>
-                <li>✔️ Ganhar 2 e-books exclusivos sobre TDAH</li>
+                <li>✔️ Receber explicação detalhada</li>
+                <li>✔️ Ganhar 2 e-books exclusivos</li>
               </ul>
 
-              <motion.div className="mt-10">
+              <div className="mt-10">
                 <button
                   onClick={handlePayment}
-                  disabled={loading}
-                  className={`inline-block ${
-                    loading ? "bg-gray-500 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600"
+                  disabled={loading || !referenceId}
+                  className={`${
+                    loading ? "bg-gray-500" : "bg-orange-500 hover:bg-orange-600"
                   } text-white font-semibold py-4 px-10 rounded-full`}
                 >
-                  {loading ? "Gerando link de pagamento..." : "ACESSAR MEU RESULTADO AGORA"}
+                  {loading ? "Gerando link..." : "ACESSAR RESULTADO"}
                 </button>
-              </motion.div>
+              </div>
             </>
           ) : (
             <div className="py-12">
@@ -178,7 +192,11 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   <p className="text-green-400">✅ Pagamento confirmado!</p>
-                  <button onClick={() => window.location.href = `/resultado?ref=${referenceId}`}>
+                  <button
+                    onClick={() =>
+                      (window.location.href = `/resultado?ref=${referenceId}`)
+                    }
+                  >
                     VER MEU RESULTADO
                   </button>
                 </>
