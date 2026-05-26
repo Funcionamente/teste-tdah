@@ -16,20 +16,19 @@ export default function Home() {
         />
 
         <h1 className="text-4xl md:text-6xl font-bold mb-6 z-10 leading-tight">
-          Descubra se os seus desvios de foco e atenção
+          Autoavaliação de Sinais de Desatenção e Impulsividade
           <br />
-          têm relação com o <span className="text-[#FFA733]">TDAH</span>
         </h1>
 
         <p className="max-w-2xl text-zinc-300 mb-10 z-10">
-          Um teste rápido e preciso para identificar traços de desatenção, impulsividade e hiperatividade em adultos.
+          Um questionário rápido para identificar possíveis traços de desatenção, impulsividade e hiperatividade em adultos.
         </p>
 
         <a
           href="/teste"
           className="inline-block px-10 py-5 rounded-2xl bg-[#FFA733] text-black font-bold shadow-[0_0_25px_#FFA73388] transition-transform transform hover:-translate-y-1"
         >
-          Iniciar meu teste agora
+          Iniciar meu questionário agora
         </a>
       </section>
 
@@ -53,7 +52,7 @@ export default function Home() {
         </div>
 
         <p className="max-w-3xl mx-auto mt-12 text-zinc-400">
-          Esses podem ser sinais de <span className="text-[#FFA733]">Traços de TDAH</span> (Transtorno de Déficit de Atenção e Hiperatividade), um padrão de funcionamento cerebral que afeta milhões de adultos em todo o mundo.
+          Esses comportamentos podem estar associados a padrões de atenção e impulsividade observados em muitas pessoas, incluindo características frequentemente relacionadas ao <span className="text-[#FFA733]">TDAH</span>
         </p>
       </section>
 
@@ -61,28 +60,28 @@ export default function Home() {
       <section className="py-20 px-6 bg-[#FFA733] text-black text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-6">O que é o TDAH?</h2>
         <p className="max-w-4xl mx-auto text-lg font-medium leading-relaxed">
-          O TDAH é um transtorno neurobiológico caracterizado por sintomas de desatenção, impulsividade e hiperatividade.
-          Ele pode afetar o desempenho no trabalho, nos estudos e nas relações pessoais, mas é totalmente possível
+          O TDAH é uma condição relacionada à atenção, impulsividade e hiperatividade, estudada por profissionais da saúde e do comportamento.
+          Essas características podem influenciar o desempenho no trabalho, nos estudos e nas relações pessoais, mas é totalmente possível
           aprender a gerenciar e equilibrar esses traços com orientação adequada.
         </p>
       </section>
 
       {/* SEÇÃO 4 - POR QUE FAZER O TESTE */}
       <section className="py-20 px-6 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-12">Por que fazer o teste?</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-12">Por que fazer a Autoavaliação?</h2>
         <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
           {[
             {
               title: "Autoconhecimento",
-              text: "Entenda melhor seus padrões de comportamento, foco e como o TDAH pode estar influenciando sua produtividade e relacionamentos.",
+              text: "Entenda melhor seus padrões de comportamento, foco e como isso pode estar influenciando sua produtividade e relacionamentos.",
             },
                         {
               title: "Próximos passos",
               text: "Saiba se é o momento de buscar avaliação profissional.",
             },
             {
-              title: "Ganhe 2 e-books grátis",
-              text: "Receba gratuitamente os e-books Explicando o TDAH e Como o TDAH afeta relacionamentos.",
+              title: "Receba 2 materiais educativos complementares",
+              text: "Receba gratuitamente conteúdos educativos sobre atenção, foco e relacionamentos.",
             },
           ].map((item, i) => (
             <div
@@ -98,20 +97,20 @@ export default function Home() {
 
       {/* SEÇÃO 5 - DEPOIMENTOS */}
       <section className="py-20 px-6 bg-zinc-900/70 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-12">O que dizem as pessoas que já fizeram o teste</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-12">O que dizem as pessoas que já fizeram a Autoavaliação</h2>
         <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
           {[
             {
               name: "Ana P.",
-              text: "O teste abriu meus olhos! Finalmente entendi porque eu sempre me sentia sobrecarregada e sem foco.",
+              text: "Esse questionário me ajudou a refletir melhor sobre meus hábitos e dificuldades de foco.",
             },
             {
               name: "Lucas M.",
-              text: "Achei super preciso e rápido. Me ajudou a buscar o acompanhamento certo. Recomendo!",
+              text: "Achei muito intuitivo e fácil de responder. Me ajudou a buscar o acompanhamento certo. Recomendo!",
             },
             {
               name: "Renata G.",
-              text: "Foi libertador! Foi o ponto de partida para eu buscar ajuda profissional, iniciar o tratamento e melhorar a minha rotina.",
+              text: "Foi uma experiência interessante para aumentar meu autoconhecimento e entender melhor minha rotina.",
             },
           ].map((d, i) => (
             <div
@@ -128,20 +127,20 @@ export default function Home() {
       {/* SEÇÃO 6 - CTA FINAL */}
       <section className="py-24 px-6 text-center relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_#FFA73322,_transparent_70%)] pointer-events-none"></div>
-        <h2 className="text-3xl md:text-5xl font-bold mb-8 z-10 relative">Pronto para descobrir se você tem traços de TDAH?</h2>
+        <h2 className="text-3xl md:text-5xl font-bold mb-8 z-10 relative">Pronto para entender melhor seus padrões de atenção e comportamento?</h2>
         <a
           href="/teste"
           className="inline-block px-10 py-5 rounded-2xl bg-[#FFA733] text-black font-bold shadow-[0_0_25px_#FFA73388] transition-transform transform hover:-translate-y-1"
         >
-          Iniciar meu teste agora
+          Iniciar minha Autoavaliação agora
         </a>
       </section>
 
       {/* SEÇÃO 7 - FAIXA DESTAQUE FINAL */}
       <section className="py-6 px-6 text-center bg-black text-zinc-400 text-sm border-t border-zinc-800">
         <p>
-          Este teste foi desenvolvido seguindo padrões internacionais de triagem em saúde mental (ASRS v1.1) e respeita as normas
-          éticas e de privacidade. É uma ferramenta informativa e não substitui diagnóstico médico ou psicológico.
+          Este questionário foi desenvolvido com base em referências amplamente utilizadas em estudos sobre atenção e comportamento, com foco em privacidade e uso responsável das informações.
+          Trata-se de uma ferramenta informativa e de autoavaliação, não substituindo diagnóstico médico, psicológico ou neuropsicológico..
         </p>
       </section>
 
