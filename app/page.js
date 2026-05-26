@@ -140,7 +140,7 @@ export default function Home() {
       <section className="py-6 px-6 text-center bg-black text-zinc-400 text-sm border-t border-zinc-800">
         <p>
           Este questionário foi desenvolvido com base em referências amplamente utilizadas em estudos sobre atenção e comportamento, com foco em privacidade e uso responsável das informações.
-          Trata-se de uma ferramenta informativa e de autoavaliação, não substituindo diagnóstico médico, psicológico ou neuropsicológico..
+          Trata-se de uma ferramenta informativa e de autoavaliação, não substituindo diagnóstico médico, psicológico ou neuropsicológico.
         </p>
       </section>
 
