@@ -13,10 +13,10 @@ export default function FaixaDestaque() {
     >
       <p className="text-white text-sm sm:text-base max-w-3xl mx-auto leading-relaxed">
         <strong className="text-[#f59e0b]">Aviso Importante: </strong>  
-        Este teste segue padrões reconhecidos internacionalmente para triagem de sintomas relacionados ao TDAH (ASRS v1.1), 
-        mas <strong>não substitui uma avaliação clínica</strong>.  
-        O resultado tem caráter informativo e não configura diagnóstico médico ou psicológico.  
-        Em caso de dúvidas, procure um profissional de saúde especializado.
+        Este questionário foi desenvolvido com base em referências amplamente utilizadas em estudos sobre atenção e comportamento, 
+        incluindo instrumentos de autoavaliação como o ASRS v1.1.  
+        Os resultados possuem caráter exclusivamente informativo e educacional, <strong>não constituindo diagnóstico médico, psicológico ou neuropsicológico</strong>.
+        Para uma avaliação adequada, recomenda-se consultar um profissional de saúde habilitado.
       </p>
     </motion.section>
   );
