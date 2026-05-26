@@ -150,7 +150,7 @@ export default function TesteTDAH() {
 
       <div className="text-center mt-10">
         <h1 className="text-3xl md:text-4xl font-semibold text-amber-400">
-          Teste Interativo TDAH
+          Questionário de Autoavaliação
         </h1>
       </div>
 
@@ -215,7 +215,7 @@ export default function TesteTDAH() {
               Estamos calculando o seu resultado...
             </h2>
             <p className="text-lg mb-8">
-              Clique abaixo para acessar o resultado completo e receber os seus 2 e-books gratuitos.
+              Clique abaixo para acessar o resultado completo e receber os seus 2 materiais educativos.
             </p>
             <button
               className="px-8 py-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-black rounded-full font-semibold hover:opacity-90 transition-all"
